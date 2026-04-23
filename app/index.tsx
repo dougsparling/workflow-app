@@ -1,6 +1,16 @@
-import { Text, View } from "react-native";
+import { useCallback, useImperativeHandle, useState } from "react";
+import { Button, Text, View } from "react-native";
+import { runAgent } from "./workflow"
 
 export default function Index() {
+  let [text, setText] = useState("nil")
+
+  let runner = useCallback(async () => {
+    let resp = await runAgent();
+    setText(resp);
+  }, [])
+
+
   return (
     <View
       style={{
@@ -9,7 +19,8 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+      <Text>Response: {text}</Text>
+      <Button title="Go!" onPress={runner} />
     </View>
   );
 }

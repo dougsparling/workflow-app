@@ -1,0 +1,13 @@
+diff --git a/dist/utils/env.js b/dist/utils/env.js
+index 47a264c08e802b4329083fcee2a2ffdac20d77c4..b70f2f1837b4b0cb254e9a85537730a15e81d135 100644
+--- a/dist/utils/env.js
++++ b/dist/utils/env.js
+@@ -12,7 +12,7 @@ var env_exports = /* @__PURE__ */ __exportAll({
+ });
+ const isBrowser = () => typeof window !== "undefined" && typeof window.document !== "undefined";
+ const isWebWorker = () => typeof globalThis === "object" && globalThis.constructor && globalThis.constructor.name === "DedicatedWorkerGlobalScope";
+-const isJsDom = () => typeof window !== "undefined" && window.name === "nodejs" || typeof navigator !== "undefined" && navigator.userAgent.includes("jsdom");
++const isJsDom = () => typeof window !== "undefined" && window.name === "nodejs" || typeof navigator !== "undefined" && navigator.userAgent?.includes("jsdom");
+ const isDeno = () => typeof Deno !== "undefined";
+ const isNode = () => typeof process !== "undefined" && typeof process.versions !== "undefined" && typeof process.versions.node !== "undefined" && !isDeno();
+ const getEnv = () => {
