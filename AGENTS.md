@@ -20,8 +20,28 @@ This is a **React Native (Expo) mobile app** called "workflow-app" that demonstr
 
 There's a small patch to `@langchain/core` (at `patches/@langchain__core@1.1.41.patch`) to fix a `navigator.userAgent` optional chaining issue for React Native compatibility. The patch is applied via pnpm's `patchedDependencies` in `pnpm-workspace.yaml`.
 
+## Directory Conventions
+
+- `app/contexts/` — React contexts, providers, and loaders (e.g. `AssetLoader`, `ThemeProvider`). Each file exports a provider or hook.
+- `app/components/` — Reusable UI components. Each component lives in its own directory, no barrel files. Pattern: `components/{name}/{name}.tsx`.
+- `app/domain/` — Reusable types and domain objects shared across the app.
+- `app/hooks/` — Reusable React hooks (data fetching, state, etc.). Import via `@hooks/*`.
+- `app/workflow/` — Library module containing the workflow engine, agent loop, tool definitions, etc.
+- `app/design/` — Design tokens, theming constants, and style utilities.
+
+## TSConfig Path Aliases
+
+```
+@hooks/*       → app/hooks/*
+@components/*  → app/components/*
+@design/*      → app/design/*
+@domain/*      → app/domain/*
+@contexts/*    → app/contexts/*
+```
+
 ## Key Files
 
-- `app/workflow/index.ts` — Core agentic loop and tool definitions.
-- `app/index.tsx` — Main screen that triggers the agent.
-- `app/_layout.tsx` — Root layout (Expo Router stack).
+- `app/workflow/agent.tsx` — Core agentic loop and tool definitions (LangChain.js ReAct agent).
+- `app/(tabs)/_layout.tsx` — Bottom tab navigator (Executions, Workflows, Settings).
+- `app/_layout.tsx` — Root layout wrapping AssetLoader, ThemeProvider, and Stack navigator.
+- `app/index.tsx` — Redirect to the Executions tab.
