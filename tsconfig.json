@@ -8,7 +8,8 @@
       "@components/*": ["./app/components/*"],
       "@design/*": ["./app/design/*"],
       "@domain/*": ["./app/domain/*"],
-      "@contexts/*": ["./app/contexts/*"]
+      "@contexts/*": ["./app/contexts/*"],
+      "@workflow/*": ["./app/workflow/*"],
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]

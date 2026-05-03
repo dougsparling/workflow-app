@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.workflowapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +29,7 @@
     },
     "plugins": [
       "expo-router",
+      "@react-native-async-storage/expo-with-async-storage",
       [
         "expo-splash-screen",
         {

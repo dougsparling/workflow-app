@@ -37,6 +37,7 @@ There's a small patch to `@langchain/core` (at `patches/@langchain__core@1.1.41.
 @design/*      → app/design/*
 @domain/*      → app/domain/*
 @contexts/*    → app/contexts/*
+@workflow/*    → app/workflow/*
 ```
 
 ## Key Files

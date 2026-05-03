@@ -19,9 +19,18 @@ importers:
       '@langchain/core':
         specifier: ^1.1.41
         version: 1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
+      '@langchain/deepseek':
+        specifier: ^1.0.25
+        version: 1.0.25(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)
       '@langchain/openai':
         specifier: ^1.4.4
         version: 1.4.4(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)
+      '@react-native-async-storage/async-storage':
+        specifier: ^3.0.2
+        version: 3.0.2(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      '@react-native-async-storage/expo-with-async-storage':
+        specifier: ^1.0.0
+        version: 1.0.0(expo@54.0.33)
       '@react-navigation/bottom-tabs':
         specifier: ^7.4.0
         version: 7.15.9(@react-navigation/native@7.2.2(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -909,6 +918,12 @@ packages:
     resolution: {integrity: sha512-KdoNEf1YVJ9jnOP+smq4O6teu63tE7GDUryOnZ2lVfooHLrHK/ECUadjOcDSCK/yk/xBw/8nexJ3ZNBMtKnstw==}
     engines: {node: '>=20'}
 
+  '@langchain/deepseek@1.0.25':
+    resolution: {integrity: sha512-8IvUmS6oeSRt129Z6d7MUqBeQlVmOiP7EfLGWCTh8BMCg6IA0n8uAb7057ryOUgzuVF6GtAAJVKmFF0CnOSIJQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@langchain/core': ^1.0.0
+
   '@langchain/langgraph-checkpoint@1.0.1':
     resolution: {integrity: sha512-HM0cJLRpIsSlWBQ/xuDC67l52SqZ62Bh2Y61DX+Xorqwoh5e1KxYvfCD7GnSTbWWhjBOutvnR0vPhu4orFkZfw==}
     engines: {node: '>=18'}
@@ -951,6 +966,12 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@langchain/core': ^1.1.39
+
+  '@langchain/openai@1.4.5':
+    resolution: {integrity: sha512-bQ2WMIZfSh02trJLYSAtiIcD3j6EBCiAm9nw0dZWQsVaUxmWc3JJqs8uUte6AkMazmLHzcUIw+14UkXO5fRJvQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@langchain/core': ^1.1.42
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
@@ -1188,6 +1209,20 @@ packages:
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
       '@types/react':
+        optional: true
+
+  '@react-native-async-storage/async-storage@3.0.2':
+    resolution: {integrity: sha512-XP0zDIl+1XoeuQ7f878qXKdl77zLwzLALPpxvNRc7ZtDh9ew36WSvOdQOhFkexMySapFAWxEbZxS8K8J2DU4eg==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+
+  '@react-native-async-storage/expo-with-async-storage@1.0.0':
+    resolution: {integrity: sha512-9LsEPqOC7XltpDWsGm7wa9KHN4tUyDRTT5vS9XSkYYNlBkYPBq3SHdKpzT2VC6emQLzHyo7ZSFyvjAo4WkZPPg==}
+    peerDependencies:
+      expo: '>=53.0.0'
+    peerDependenciesMeta:
+      expo:
         optional: true
 
   '@react-native/assets-registry@0.81.5':
@@ -2726,6 +2761,9 @@ packages:
 
   hyphenate-style-name@1.1.0:
     resolution: {integrity: sha512-WDC/ui2VVRrz3jOVi+XtjqkDjiVjTtFaAGiW37k6b+ohyQ5wYDOGkvCZa8+H0nx3gyvv0+BST9xuOgIyGQ00gw==}
+
+  idb@8.0.3:
+    resolution: {integrity: sha512-LtwtVyVYO5BqRvcsKuB2iUMnHwPVByPCXFXOpuU96IZPPoPN6xjOGxZQ74pgSVVLQWtUOYgyeL4GE98BY5D3wg==}
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -5631,6 +5669,13 @@ snapshots:
       - openai
       - ws
 
+  '@langchain/deepseek@1.0.25(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)':
+    dependencies:
+      '@langchain/core': 1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
+      '@langchain/openai': 1.4.5(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)
+    transitivePeerDependencies:
+      - ws
+
   '@langchain/langgraph-checkpoint@1.0.1(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))':
     dependencies:
       '@langchain/core': 1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
@@ -5662,6 +5707,15 @@ snapshots:
       - vue
 
   '@langchain/openai@1.4.4(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)':
+    dependencies:
+      '@langchain/core': 1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
+      js-tiktoken: 1.0.21
+      openai: 6.34.0(ws@8.20.0)(zod@4.3.6)
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - ws
+
+  '@langchain/openai@1.4.5(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)':
     dependencies:
       '@langchain/core': 1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
       js-tiktoken: 1.0.21
@@ -5872,6 +5926,16 @@ snapshots:
       react: 19.1.0
     optionalDependencies:
       '@types/react': 19.1.17
+
+  '@react-native-async-storage/async-storage@3.0.2(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      idb: 8.0.3
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
+
+  '@react-native-async-storage/expo-with-async-storage@1.0.0(expo@54.0.33)':
+    optionalDependencies:
+      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
 
   '@react-native/assets-registry@0.81.5': {}
 
@@ -7725,6 +7789,8 @@ snapshots:
       - supports-color
 
   hyphenate-style-name@1.1.0: {}
+
+  idb@8.0.3: {}
 
   ieee754@1.2.1: {}
 
