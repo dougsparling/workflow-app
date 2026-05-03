@@ -1,13 +1,21 @@
 import { useCallback, useState } from 'react'
-import { Button, Text, View } from 'react-native'
+import { Button, FlatList, Text, View } from 'react-native'
 import { runAgent } from './workflow/agent'
+import { BaseMessage, Message } from '@langchain/core/messages'
+import PrimaryButton from './design/PrimaryButton/PrimaryButton'
 
 export default function Agent() {
-  let [text, setText] = useState('nil')
+  const [msgs, setMsgs] = useState([] as BaseMessage[])
+  const [running, setRunning] = useState(false)
 
-  let runner = useCallback(async () => {
-    let resp = await runAgent('What is the weather in Tokyo?')
-    setText(resp)
+  const runner = useCallback(async () => {
+    setRunning(true)
+    runAgent('What is the weather in Tokyo?', ({ msg, last }) => {
+      setMsgs(prev => [...prev, msg])
+      if (last) {
+        setRunning(false)
+      }
+    }).finally(() => setRunning(false))
   }, [])
 
   return (
@@ -18,8 +26,9 @@ export default function Agent() {
         alignItems: 'center',
       }}
     >
-      <Text>Response: {text}</Text>
-      <Button title="Go!" onPress={runner} />
+      <FlatList data={msgs} renderItem={({ item }) => <Text>{item.content.toString()}</Text>} />
+
+      <PrimaryButton label="Go" onPress={runner} disabled={running} />
     </View>
   )
 }

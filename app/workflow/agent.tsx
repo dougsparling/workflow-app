@@ -60,18 +60,27 @@ const tools = [getWeather, getExchangeRate]
 const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 const modelWithTools = qwen.bindTools(tools)
 
-const agenticLoop = async (initial: MessageThread) => {
+type OnNextCallback = {
+    msg: BaseMessage,
+    last: boolean
+}
+
+const agenticLoop = async (initial: MessageThread, callback: (_: OnNextCallback) => void) => {
   const messages = [...initial]
+  messages.forEach((msg) => callback({msg, last: false}))
   while (true) {
     const response = await modelWithTools.invoke(messages)
     messages.push(response)
     if (AIMessage.isInstance(response) && response.tool_calls?.length) {
-      //
+      // only tool calls require harness intervention for now
       for (const call of response.tool_calls) {
-        // @ts-expect-error union tool invoke signatures are incompatible — dispatched dynamically by name
-        messages.push(await toolsByName[call.name].invoke(call))
+        // @ts-expect-error specific tool types erased in toolsByName
+        const toolMsg = await toolsByName[call.name].invoke(call) as ToolMessage
+        callback({msg: toolMsg, last: false})
+        messages.push(toolMsg)
       }
     } else {
+      callback({msg: response, last: true})
       break
     }
   }
@@ -79,8 +88,8 @@ const agenticLoop = async (initial: MessageThread) => {
   return messages
 }
 
-export async function runAgent(prompt: string) {
-  const resp = await agenticLoop([new HumanMessage('prompt')])
+export async function runAgent(prompt: string, onMessage: (_: OnNextCallback) => void) {
+  const resp = await agenticLoop([new HumanMessage(prompt)], onMessage)
   const content = resp.map((m) => m.content).join('\n')
   console.log(content)
   return content
