@@ -1,32 +1,55 @@
 import { Tabs } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Feather } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTheme } from '@design/theme'
 
 export default function TabLayout() {
+  const { tokens: t } = useTheme()
+  const insets = useSafeAreaInsets()
+
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          backgroundColor: t.bgSurface,
+          borderTopColor: t.borderDefault,
+          borderTopWidth: 1,
+          height: 56 + insets.bottom,
+        },
+        tabBarActiveTintColor: t.accentBase,
+        tabBarInactiveTintColor: t.textDisabled,
+        tabBarLabelStyle: {
+          fontFamily: t.fontMono,
+          fontSize: t.textXs,
+          letterSpacing: t.trackingWide,
+        },
+      }}
+    >
       <Tabs.Screen
         name="executions"
         options={{
-          title: 'Executions',
+          title: 'executions',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="play-circle" size={size} color={color} />
+            <Feather name="play-circle" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="workflows"
         options={{
-          title: 'Workflows',
+          title: 'workflows',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="git-network" size={size} color={color} />
+            <Feather name="git-branch" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} />,
+          title: 'settings',
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="settings" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

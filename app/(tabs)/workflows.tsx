@@ -4,7 +4,8 @@ import Agent from '../agent'
 export default function Workflows() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Agent />
+      {/* <Agent /> */}
+      
     </View>
   )
 }
