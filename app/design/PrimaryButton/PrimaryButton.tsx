@@ -1,6 +1,6 @@
 // components/PrimaryButton/PrimaryButton.tsx
-import React, { type ReactNode } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import React, { useState } from 'react'
+import { Pressable, Text } from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
 import type { ComponentProps } from 'react'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
@@ -23,14 +23,24 @@ export default function PrimaryButton({
   variant = 'primary',
   disabled = false,
 }: Props) {
+  const [pressed, setPressed] = useState(false)
   const styles = useThemedStyles(themedStyles)
   const { tokens: t } = useTheme()
+
+  const color =
+    disabled                  ? t.textDisabled :
+    variant === 'primary'     ? t.bgBase :
+    variant === 'ghost'       ? t.accentBase :
+    variant === 'destructive' ? '#fff' :
+    t.bgBase
 
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => [
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={[
         styles.base,
         variant === 'primary'     && styles.variantPrimary,
         variant === 'ghost'       && styles.variantGhost,
@@ -41,21 +51,8 @@ export default function PrimaryButton({
         disabled && styles.disabled,
       ]}
     >
-      {({ pressed }) => {
-        const color =
-          disabled      ? t.textDisabled :
-          variant === 'primary'     ? (pressed ? t.accentBright : t.bgBase) :
-          variant === 'ghost'       ? t.accentBase :
-          variant === 'destructive' ? (pressed ? t.errorBright : '#fff') :
-          t.bgBase
-
-        return (
-          <View style={styles.inner}>
-            {icon ? <Feather name={icon} size={14} color={color} /> : null}
-            <Text style={[styles.label, { color }]}>{label}</Text>
-          </View>
-        )
-      }}
+      {icon ? <Feather name={icon} size={14} color={color} /> : null}
+      <Text style={[styles.label, { color }]}>{label}</Text>
     </Pressable>
   )
 }
@@ -65,10 +62,6 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     height: tokens.touchTargetSm,
     alignSelf: 'flex-start' as const,
     borderRadius: tokens.radiusNone,
-    overflow: 'hidden' as const,
-  },
-  inner: {
-    flex: 1,
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,

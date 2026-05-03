@@ -1,6 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai'
 import * as z from 'zod'
-import { AIMessage, BaseMessage, HumanMessage } from '@langchain/core/messages'
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { polyfillWebCrypto } from 'expo-standard-web-crypto'
 import { Model } from './models'
@@ -16,14 +16,17 @@ type OnNextCallback = {
   last: boolean
 }
 
-type AgentDef = {
+export type AgentDef = {
   model: Model
   tools: Tool[]
-  prompt: string
+  systemPrompt: string
 }
 
-export const runAgent = async (agent: AgentDef, callback: (_: OnNextCallback) => void) => {
-  const messages: MessageThread = [new HumanMessage(agent.prompt)]
+export const runAgent = async (agent: AgentDef, prompt: string, callback: (_: OnNextCallback) => void) => {
+  const messages: MessageThread = [
+    new SystemMessage(agent.systemPrompt),
+    new HumanMessage(prompt),
+  ]
   messages.forEach((msg) => callback({ msg, last: false }))
 
   const model = await agent.model.factory()

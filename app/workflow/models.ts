@@ -20,7 +20,7 @@ const makeQwen = async () => new ChatOpenAI({
 })
 
 export const deepseekApiKey = {
-  set: async (key: string): Promise<void>,
+  set: async (key: string) => AsyncStorage.setItem(DEEPSEEK_KEY_STORAGE, key),
   get: async () => await AsyncStorage.getItem(DEEPSEEK_KEY_STORAGE)
 }
 
@@ -32,9 +32,8 @@ const makeDeepSeek = async () => {
   })
 }
 
-const models: Model[] = [
-  { label: "Qwen (Local)", factory: makeQwen },
-  { label: "DeepSeek (Flash)", factory: makeDeepSeek }
-]
+const qwen = { label: "Qwen (Local)", factory: makeQwen }
+const deepseek = { label: "DeepSeek (Flash)", factory: makeDeepSeek }
+const models: Model[] = [qwen, deepseek]
 
-export { models as default }
+export { models as default, qwen, deepseek }

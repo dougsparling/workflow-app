@@ -1,4 +1,4 @@
-import { tool } from '@langchain/core/tools'
+import { tool, type StructuredToolInterface } from '@langchain/core/tools'
 import z from 'zod'
 
 const weatherDB: Record<string, string> = {
@@ -7,7 +7,7 @@ const weatherDB: Record<string, string> = {
   montreal: 'Light snow, -10°C, 40km/h gusts',
 }
 
-export type Tool = ReturnType<typeof tool>
+export type Tool = StructuredToolInterface
 
 export const getWeather = tool(
   (input) => weatherDB[input.city.toLowerCase()] ?? `Unknown city: ${input.city}`,
@@ -18,7 +18,7 @@ export const getWeather = tool(
       city: z.string().describe('The city to get the weather for'),
     }),
   },
-)
+) as Tool
 
 export const getExchangeRate = tool(
   (input) =>
@@ -30,8 +30,8 @@ export const getExchangeRate = tool(
       from: z.string().describe('The source currency code, e.g. JPY, CAD'),
     }),
   },
-)
+) as Tool
 
-const tools = [getWeather as Tool, getExchangeRate as Tool]
+const tools: Tool[] = [getWeather, getExchangeRate]
 
 export default tools

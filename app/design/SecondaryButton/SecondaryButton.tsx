@@ -1,6 +1,6 @@
 // components/SecondaryButton/SecondaryButton.tsx
-import React from 'react'
-import { Pressable, Text, View } from 'react-native'
+import React, { useState } from 'react'
+import { Pressable, Text } from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
 import type { ComponentProps } from 'react'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
@@ -16,28 +16,26 @@ interface Props {
 }
 
 export default function SecondaryButton({ label, icon, onPress, disabled = false }: Props) {
+  const [pressed, setPressed] = useState(false)
   const styles = useThemedStyles(themedStyles)
   const { tokens: t } = useTheme()
+
+  const color = disabled ? t.textDisabled : t.textPrimary
 
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => [
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={[
         styles.base,
         pressed && styles.pressed,
         disabled && styles.disabled,
       ]}
     >
-      {({ pressed }) => {
-        const color = disabled ? t.textDisabled : pressed ? t.textPrimary : t.textPrimary
-        return (
-          <View style={[styles.inner, pressed && styles.innerPressed]}>
-            {icon ? <Feather name={icon} size={14} color={color} /> : null}
-            <Text style={[styles.label, { color }]}>{label}</Text>
-          </View>
-        )
-      }}
+      {icon ? <Feather name={icon} size={14} color={color} /> : null}
+      <Text style={[styles.label, { color }]}>{label}</Text>
     </Pressable>
   )
 }
@@ -50,6 +48,11 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     backgroundColor: tokens.bgSurface,
     borderWidth: 1,
     borderColor: tokens.borderDefault,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: tokens.space1 + 2,
+    paddingHorizontal: tokens.space5,
   },
   pressed: {
     backgroundColor: tokens.bgOverlay,
@@ -58,15 +61,6 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   disabled: {
     borderColor: tokens.borderSubtle,
   },
-  inner: {
-    flex: 1,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    gap: tokens.space1 + 2,
-    paddingHorizontal: tokens.space5,
-  },
-  innerPressed: {},
   label: {
     fontFamily: tokens.fontMono,
     fontSize: tokens.textBase - 1,
