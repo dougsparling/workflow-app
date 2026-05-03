@@ -44,6 +44,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="agents"
+        options={{
+          title: 'agents',
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="cpu" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: 'settings',

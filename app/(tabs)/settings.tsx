@@ -2,8 +2,9 @@ import { Text, View } from 'react-native'
 import { useCallback, useEffect, useState } from 'react'
 import { deepseekApiKey } from '@workflow/models'
 import PrimaryButton from '@design/PrimaryButton/PrimaryButton'
-import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
+import { createThemedStyles, useThemedStyles } from '@design/theme'
 import { TextInput } from '@design/TextInput/TextInput'
+import Background from '@design/Background/Background'
 
 export default function Settings() {
   const [apiKey, setApiKey] = useState(null as string | null)
@@ -26,7 +27,7 @@ export default function Settings() {
   }, [])
 
   return (
-    <View style={styles.container}>
+    <Background>
       <View style={styles.section}>
         <Text style={styles.label}>DeepSeek API Key</Text>
         <TextInput
@@ -44,17 +45,11 @@ export default function Settings() {
           disabled={!apiKey?.trim() || saved}
         />
       </View>
-    </View>
+    </Background>
   )
 }
 
 const themedStyles = createThemedStyles((tokens) => ({
-  container: {
-    flex: 1,
-    backgroundColor: tokens.bgBase,
-    padding: tokens.space4,
-    paddingTop: tokens.space6,
-  },
   section: {
     gap: tokens.space3,
   },

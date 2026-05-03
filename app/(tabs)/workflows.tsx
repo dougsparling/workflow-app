@@ -1,11 +1,10 @@
-import { Text, View } from 'react-native'
-import Agent from '../agent'
+import { Text } from 'react-native'
+import Background from '@design/Background/Background'
 
 export default function Workflows() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {/* <Agent /> */}
-      
-    </View>
+    <Background>
+      <Text>Workflows</Text>
+    </Background>
   )
 }

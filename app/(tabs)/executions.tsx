@@ -1,9 +1,10 @@
-import { Text, View } from 'react-native'
+import { Text } from 'react-native'
+import Background from '@design/Background/Background'
 
 export default function Executions() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Background>
       <Text>Executions</Text>
-    </View>
+    </Background>
   )
 }
