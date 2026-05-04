@@ -1,6 +1,4 @@
-import { ChatOpenAI } from '@langchain/openai'
-import * as z from 'zod'
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages'
 
 import { polyfillWebCrypto } from 'expo-standard-web-crypto'
 import { Model } from './models'
@@ -40,7 +38,7 @@ export const runAgent = async (agent: AgentDef, prompt: string, callback: (_: On
             throw new Error(
               `${agent.tools.length} tools given but not supported by ${agent.model.label}`,
             )
-          return model.bindTools!!(tools)
+          return model.bindTools!(tools)
         })()
       : model
 
@@ -50,7 +48,6 @@ export const runAgent = async (agent: AgentDef, prompt: string, callback: (_: On
     if (AIMessage.isInstance(response) && response.tool_calls?.length) {
       // only tool calls require harness intervention for now
       for (const call of response.tool_calls) {
-        // @ts-expect-error specific tool types erased in toolsByName
         const toolMsg = (await toolsByName[call.name].invoke(call)) as ToolMessage
         callback({ msg: toolMsg, last: false })
         messages.push(toolMsg)

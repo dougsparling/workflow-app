@@ -4,8 +4,8 @@ import {
   View,
   Text,
   TextInput as RNTextInput,
-  type TextInputProps as RNTextInputProps,
 } from 'react-native'
+import type { TextInputProps as RNTextInputProps } from 'react-native'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
 

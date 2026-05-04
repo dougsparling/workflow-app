@@ -6,9 +6,10 @@ import PrimaryButton from '@design/PrimaryButton/PrimaryButton'
 import { TextInput } from '@design/TextInput/TextInput'
 import { createThemedStyles, useThemedStyles } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
-import { AgentDef, runAgent } from '@workflow/agent'
+import type { AgentDef } from '@workflow/agent'
 import { qwen, deepseek } from '@workflow/models'
 import { getWeather, getExchangeRate } from '@workflow/tools'
+import { useExecutionStore } from '@store/executionQueue'
 
 const weatherAgent: AgentDef = {
   systemPrompt: 'You are a helpful assistant that provides weather reports, along with a cute interpretation.',
@@ -73,7 +74,7 @@ function RunPromptModal({
   visible,
   onRun,
   onCancel,
-}: RunPromptModalProps) {
+}: Omit<RunPromptModalProps, 'item'> & { item: AgentItem | null }) {
   const [prompt, setPrompt] = useState('')
   const styles = useThemedStyles(themedStyles)
 
@@ -112,22 +113,14 @@ function RunPromptModal({
 
 export default function Agents() {
   const [selected, setSelected] = useState(null as AgentItem | null)
-  const [running, setRunning] = useState(false)
   const styles = useThemedStyles(themedStyles)
+  const enqueue = useExecutionStore((s) => s.enqueue)
 
   const handleRun = useCallback((prompt: string) => {
-    if (!selected || running) return
-    setRunning(true)
-    runAgent(selected.def, prompt, ({ msg, last }) => {
-      if (last) {
-        setRunning(false)
-        setSelected(null)
-      }
-    }).catch(() => {
-      setRunning(false)
-      setSelected(null)
-    })
-  }, [selected, running])
+    if (!selected) return
+    enqueue(selected.name, prompt, selected.def)
+    setSelected(null)
+  }, [selected, enqueue])
 
   return (
     <Background>

@@ -2,7 +2,7 @@ import { useFonts } from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, type ReactNode } from 'react'
 
-SplashScreen.preventAutoHideAsync()
+SplashScreen.preventAutoHideAsync().catch(() => {})
 
 export function AssetLoader({ children }: { children: ReactNode }) {
   const [loaded] = useFonts({

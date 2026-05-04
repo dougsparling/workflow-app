@@ -3,13 +3,13 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./*"],
-      "@hooks/*": ["./app/hooks/*"],
-      "@components/*": ["./app/components/*"],
-      "@design/*": ["./app/design/*"],
-      "@domain/*": ["./app/domain/*"],
-      "@contexts/*": ["./app/contexts/*"],
-      "@workflow/*": ["./app/workflow/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@components/*": ["./src/components/*"],
+      "@design/*": ["./src/design/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@contexts/*": ["./src/contexts/*"],
+      "@workflow/*": ["./src/workflow/*"],
+      "@store/*": ["./src/store/*"],
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
