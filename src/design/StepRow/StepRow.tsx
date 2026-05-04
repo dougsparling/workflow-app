@@ -1,7 +1,8 @@
 // components/StepRow/StepRow.tsx
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { createThemedStyles, useThemedStyles } from '../theme'
+import { Feather } from '@expo/vector-icons'
+import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
 import StatusBadge, { type ExecutionStatus } from '../StatusBadge/StatusBadge'
 
@@ -10,9 +11,12 @@ interface Props {
   name: string
   status: ExecutionStatus
   duration?: string
+  icon?: string
+  iconColor?: string
 }
 
-export default function StepRow({ index, name, status, duration }: Props) {
+export default function StepRow({ index, name, status, duration, icon, iconColor }: Props) {
+  const { tokens } = useTheme()
   const styles = useThemedStyles(themedStyles)
   const isRunning = status === 'running'
 
@@ -22,6 +26,9 @@ export default function StepRow({ index, name, status, duration }: Props) {
       isRunning && styles.rowRunning,
     ]}>
       <View style={styles.indexBadge}>
+        {icon && (
+          <Feather name={icon as any} size={12} color={iconColor ?? tokens.accentBase} />
+        )}
         <Text style={styles.indexText}>{String(index).padStart(2, '0')}</Text>
       </View>
       <View style={styles.content}>
