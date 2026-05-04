@@ -1,12 +1,12 @@
 import { FlatList, Text, View } from 'react-native'
+import { ToolMessage } from '@langchain/core/messages'
 import Background from '@design/Background/Background'
-import LogLine from '@design/LogLine/LogLine'
 import PrimaryButton from '@design/PrimaryButton/PrimaryButton'
-import StatusBadge from '@design/StatusBadge/StatusBadge'
+import StepRow from '@design/StepRow/StepRow'
 import type { ExecutionStatus } from '@design/StatusBadge/StatusBadge'
 import { createThemedStyles, useThemedStyles } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
-import { type Job, messageLevel, useExecutionStore } from '@store/executionQueue'
+import { type Job, useExecutionStore } from '@store/executionQueue'
 
 function jobBadgeStatus(status: Job['status']): ExecutionStatus {
   if (status === 'done') return 'complete'
@@ -14,47 +14,22 @@ function jobBadgeStatus(status: Job['status']): ExecutionStatus {
   return status
 }
 
-function formatTime(ts: number): string {
-  return new Date(ts).toLocaleTimeString('en-US', {
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  })
-}
-
-function JobCard({ job, onCancel }: { job: Job; onCancel: () => void }) {
+function JobCard({ job, index, onCancel }: { job: Job; index: number; onCancel: () => void }) {
   const styles = useThemedStyles(themedStyles)
-  const visibleMessages = job.messages.filter((e) => messageLevel(e.msg) !== null)
+  const toolCalls = job.messages.filter((e) => ToolMessage.isInstance(e.msg)).length
+  const duration = `${toolCalls} call${toolCalls !== 1 ? 's' : ''}`
 
   return (
     <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View style={styles.cardMeta}>
-          <Text style={styles.agentName}>{job.agentName}</Text>
-          <StatusBadge status={jobBadgeStatus(job.status)} />
-        </View>
-        {job.status === 'running' && (
+      <StepRow
+        index={index + 1}
+        name={job.agentName}
+        status={jobBadgeStatus(job.status)}
+        duration={duration}
+      />
+      {job.status === 'running' && (
+        <View style={styles.cancelRow}>
           <PrimaryButton label="Cancel" variant="ghost" onPress={onCancel} />
-        )}
-      </View>
-      <Text style={styles.prompt} numberOfLines={2}>{job.prompt}</Text>
-      {visibleMessages.length > 0 && (
-        <View style={styles.messages}>
-          {visibleMessages.map((entry, i) => {
-            const level = messageLevel(entry.msg)!
-            const content = typeof entry.msg.content === 'string'
-              ? entry.msg.content
-              : JSON.stringify(entry.msg.content)
-            return (
-              <LogLine
-                key={i}
-                time={formatTime(entry.ts)}
-                level={level}
-                message={content}
-              />
-            )
-          })}
         </View>
       )}
     </View>
@@ -81,8 +56,8 @@ export default function Executions() {
       <FlatList
         data={[...jobs].reverse()}
         keyExtractor={(job) => job.id}
-        renderItem={({ item }) => (
-          <JobCard job={item} onCancel={() => cancel(item.id)} />
+        renderItem={({ item, index }) => (
+          <JobCard job={item} index={index} onCancel={() => cancel(item.id)} />
         )}
         contentContainerStyle={styles.list}
       />
@@ -97,34 +72,12 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   },
   card: {
     backgroundColor: tokens.bgSurface,
-    gap: tokens.space2,
     paddingVertical: tokens.space3,
   },
-  cardHeader: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
+  cancelRow: {
     paddingHorizontal: tokens.space4,
-  },
-  cardMeta: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: tokens.space2,
-  },
-  agentName: {
-    fontFamily: tokens.fontMono,
-    fontSize: tokens.textBase,
-    fontWeight: tokens.weightMedium,
-    color: tokens.textPrimary,
-  },
-  prompt: {
-    fontFamily: tokens.fontSans,
-    fontSize: tokens.textSm,
-    color: tokens.textMuted,
-    paddingHorizontal: tokens.space4,
-  },
-  messages: {
-    marginTop: tokens.space1,
+    paddingTop: tokens.space1,
+    alignItems: 'flex-end' as const,
   },
   empty: {
     flex: 1,
