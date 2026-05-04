@@ -9,7 +9,7 @@ export type Workflow<In, Out> = {
 }
 
 export type WorkflowBuilder<In, Out> = {
-  step: <Next>(name: string, fn: (input: Out) => Promise<Next>) => WorkflowBuilder<In, Next>
+  step: <Next>(name: string, fn: (input: Out) => Next | Promise<Next>) => WorkflowBuilder<In, Next>
   create: () => Workflow<In, Out>
 }
 
@@ -23,7 +23,7 @@ async function runSteps<In, Out>(steps: Step<any, any>[], input: In): Promise<Ou
 
 function makeBuilder<In, Out>(steps: Step<any, any>[]): WorkflowBuilder<In, Out> {
   return {
-    step<Next>(name: string, fn: (input: Out) => Promise<Next>): WorkflowBuilder<In, Next> {
+    step<Next>(name: string, fn: (input: Out) => Next | Promise<Next>): WorkflowBuilder<In, Next> {
       const nextSteps = [...steps, { name, execute: fn as any }]
       return makeBuilder<In, Next>(nextSteps)
     },
