@@ -25,9 +25,10 @@ export type Job = {
 
 type ExecutionQueueStore = {
   jobs: Job[]
-  _nextId: number
   enqueue: (agentName: string, prompt: string, def: AgentDef) => void
   cancel: (id: string) => void
+  
+  _nextId: number
   _advance: () => void
   _onMessage: (id: string, msg: BaseMessage) => void
   _onDone: (id: string, status: 'done' | 'error') => void

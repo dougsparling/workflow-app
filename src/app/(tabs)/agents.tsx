@@ -12,36 +12,60 @@ import { getWeather, getExchangeRate } from '@workflow/tools'
 import { useExecutionStore } from '@store/executionQueue'
 
 const weatherAgent: AgentDef = {
-  systemPrompt: 'You are a helpful assistant that provides weather reports, along with a cute interpretation.',
+  name: 'Weather',
+  systemPrompt:
+    'You are a helpful assistant that provides weather reports, along with a cute interpretation.',
   model: qwen,
   tools: [getWeather],
 }
 
 const financeAgent: AgentDef = {
-  systemPrompt: 'You are a helpful assistant that provides exchange rate data with concise analysis.',
+  name: 'Finance',
+  systemPrompt:
+    'You are a helpful assistant that provides exchange rate data with concise analysis.',
   model: qwen,
   tools: [getExchangeRate],
 }
 
 const researchAgent: AgentDef = {
-  systemPrompt: 'You are a helpful research assistant. Use all available tools to answer questions thoroughly.',
+  name: 'Research',
+  systemPrompt:
+    'You are a helpful research assistant. Use all available tools to answer questions thoroughly.',
   model: deepseek,
   tools: [getWeather, getExchangeRate],
 }
 
 const assistantAgent: AgentDef = {
-  systemPrompt: 'You are a helpful general-purpose assistant. Answer questions directly and concisely.',
+  name: 'Assistant',
+  systemPrompt:
+    'You are a helpful general-purpose assistant. Answer questions directly and concisely.',
   model: qwen,
   tools: [],
 }
 
-type AgentItem = { name: string; desc: string; def: AgentDef; examplePrompt: string }
+type AgentItem = { desc: string; def: AgentDef; examplePrompt: string }
 
 const agents: AgentItem[] = [
-  { name: 'Weather', desc: 'Describes the current weather', def: weatherAgent, examplePrompt: 'What is the weather in Tokyo?' },
-  { name: 'Finance', desc: 'Gets exchange rates and currency data', def: financeAgent, examplePrompt: 'What is the USD exchange rate for JPY?' },
-  { name: 'Research', desc: 'Weather and finance tools combined', def: researchAgent, examplePrompt: 'Is it a good time to visit Tokyo given the weather and exchange rate?' },
-  { name: 'Assistant', desc: 'General chat with no tools', def: assistantAgent, examplePrompt: 'Tell me a fun fact about Japan.' },
+  {
+    desc: 'Describes the current weather',
+    def: weatherAgent,
+    examplePrompt: 'What is the weather in Tokyo?',
+  },
+  {
+    desc: 'Gets exchange rates and currency data',
+    def: financeAgent,
+    examplePrompt: 'What is the USD exchange rate for JPY?',
+  },
+  {
+    desc: 'Weather and finance tools combined',
+    def: researchAgent,
+    examplePrompt: 'Is it a good time to visit Tokyo given the weather and exchange rate?',
+  },
+  {
+    desc: 'General chat with no tools',
+    def: assistantAgent,
+    examplePrompt: 'Tell me a fun fact about Japan.',
+  },
 ]
 
 function AgentRow({ item, onSelect }: { item: AgentItem; onSelect: (item: AgentItem) => void }) {
@@ -50,14 +74,14 @@ function AgentRow({ item, onSelect }: { item: AgentItem; onSelect: (item: AgentI
   return (
     <View style={styles.row}>
       <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.desc} numberOfLines={1}>{item.desc}</Text>
+        <Text style={styles.name} numberOfLines={1}>
+          {item.def.name}
+        </Text>
+        <Text style={styles.desc} numberOfLines={1}>
+          {item.desc}
+        </Text>
       </View>
-      <PrimaryButton
-        label="Run"
-        icon="play"
-        onPress={() => onSelect(item)}
-      />
+      <PrimaryButton label="Run" icon="play" onPress={() => onSelect(item)} />
     </View>
   )
 }
@@ -85,7 +109,7 @@ function RunPromptModal({
       <View style={styles.modalContent}>
         {item ? (
           <>
-            <Text style={styles.modalTitle}>{item.name}</Text>
+            <Text style={styles.modalTitle}>{item.def.name}</Text>
             <Text style={styles.modalDesc}>{item.desc}</Text>
           </>
         ) : null}
@@ -116,20 +140,21 @@ export default function Agents() {
   const styles = useThemedStyles(themedStyles)
   const enqueue = useExecutionStore((s) => s.enqueue)
 
-  const handleRun = useCallback((prompt: string) => {
-    if (!selected) return
-    enqueue(selected.name, prompt, selected.def)
-    setSelected(null)
-  }, [selected, enqueue])
+  const handleRun = useCallback(
+    (prompt: string) => {
+      if (!selected) return
+      enqueue(selected.def.name, prompt, selected.def)
+      setSelected(null)
+    },
+    [selected, enqueue],
+  )
 
   return (
     <Background>
       <FlatList
         data={agents}
-        keyExtractor={(item) => item.name}
-        renderItem={({ item }) => (
-          <AgentRow item={item} onSelect={setSelected} />
-        )}
+        keyExtractor={(item) => item.def.name}
+        renderItem={({ item }) => <AgentRow item={item} onSelect={setSelected} />}
         contentContainerStyle={styles.list}
       />
       <RunPromptModal

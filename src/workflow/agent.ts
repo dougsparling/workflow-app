@@ -15,6 +15,7 @@ type OnNextCallback = {
 }
 
 export type AgentDef = {
+  name: string
   model: Model
   tools: Tool[]
   systemPrompt: string
