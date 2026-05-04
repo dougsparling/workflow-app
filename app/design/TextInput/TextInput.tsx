@@ -91,9 +91,11 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     backgroundColor: tokens.bgSurface,
     borderWidth: tokens.borderWidthDefault,
     borderColor: tokens.borderDefault,
-    height: tokens.touchTargetSm,
+    minHeight: tokens.touchTargetSm,
     paddingHorizontal: tokens.space3,
+    paddingVertical: tokens.space2,
     includeFontPadding: false,
+    textAlignVertical: 'top' as const,
   },
   inputError: {
     borderColor: tokens.errorBase,
