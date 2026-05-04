@@ -60,7 +60,6 @@ export default function PrimaryButton({
 const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   base: {
     height: tokens.touchTargetSm,
-    alignSelf: 'flex-start' as const,
     borderRadius: tokens.radiusNone,
     flexDirection: 'row' as const,
     alignItems: 'center' as const,

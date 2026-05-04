@@ -25,7 +25,6 @@ function JobCard({ job, index, onCancel }: { job: Job; index: number; onCancel: 
   return (
     <View style={styles.card}>
       <StepRow
-        index={index + 1}
         name={job.agentName}
         status={jobBadgeStatus(job.status)}
         duration={duration}

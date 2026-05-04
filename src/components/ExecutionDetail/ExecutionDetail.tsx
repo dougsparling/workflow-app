@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, Text, View } from 'react-native'
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages'
 import StatusBadge from '@design/StatusBadge/StatusBadge'
 import StepRow from '@design/StepRow/StepRow'
+import type { FeatherIconName } from '@design/StepRow/StepRow'
 import type { ExecutionStatus } from '@design/StatusBadge/StatusBadge'
 import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
@@ -12,7 +13,7 @@ interface Props {
   executionId: string
 }
 
-function messageIcon(msg: HumanMessage | AIMessage | ToolMessage): string {
+function messageIcon(msg: HumanMessage | AIMessage | ToolMessage): FeatherIconName {
   if (HumanMessage.isInstance(msg)) return 'user'
   if (AIMessage.isInstance(msg)) {
     if (msg.tool_calls?.length) return 'zap'
@@ -88,7 +89,6 @@ export default function ExecutionDetail({ executionId }: Props) {
         keyExtractor={(_, i) => String(i)}
         renderItem={({ item, index }) => (
           <StepRow
-            index={index + 1}
             name={messageLabel(item.msg)}
             status="complete"
             icon={messageIcon(item.msg)}

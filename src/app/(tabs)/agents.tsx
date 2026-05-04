@@ -80,6 +80,9 @@ function AgentRow({ item, onSelect }: { item: AgentItem; onSelect: (item: AgentI
         <Text style={styles.desc} numberOfLines={1}>
           {item.desc}
         </Text>
+        <Text style={styles.desc} numberOfLines={1}>
+          {item.def.model.label} &mdash; {item.def.tools.length} tool(s)
+        </Text>
       </View>
       <PrimaryButton label="Run" icon="play" onPress={() => onSelect(item)} />
     </View>

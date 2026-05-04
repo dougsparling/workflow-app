@@ -6,16 +6,17 @@ import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
 import StatusBadge, { type ExecutionStatus } from '../StatusBadge/StatusBadge'
 
+export type FeatherIconName = React.ComponentProps<typeof Feather>['name']
+
 interface Props {
-  index: number
   name: string
   status: ExecutionStatus
   duration?: string
-  icon?: string
+  icon?: FeatherIconName
   iconColor?: string
 }
 
-export default function StepRow({ index, name, status, duration, icon, iconColor }: Props) {
+export default function StepRow({ name, status, duration, icon, iconColor }: Props) {
   const { tokens } = useTheme()
   const styles = useThemedStyles(themedStyles)
   const isRunning = status === 'running'
@@ -25,12 +26,11 @@ export default function StepRow({ index, name, status, duration, icon, iconColor
       styles.row,
       isRunning && styles.rowRunning,
     ]}>
-      <View style={styles.indexBadge}>
-        {icon && (
-          <Feather name={icon as any} size={12} color={iconColor ?? tokens.accentBase} />
-        )}
-        <Text style={styles.indexText}>{String(index).padStart(2, '0')}</Text>
-      </View>
+      {icon && (
+        <View style={styles.iconBadge}>
+          <Feather name={icon} size={14} color={iconColor ?? tokens.accentBase} />
+        </View>
+      )}
       <View style={styles.content}>
         <Text style={styles.name}>{name}</Text>
         {duration ? <Text style={styles.duration}>{duration}</Text> : null}
@@ -56,20 +56,15 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     borderLeftColor: tokens.statusRunning,
     paddingLeft: tokens.space3,
   },
-  indexBadge: {
-    width: tokens.space6,
-    height: tokens.space6,
+  iconBadge: {
+    width: tokens.space6 + 4,
+    height: tokens.space6 + 4,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     backgroundColor: tokens.accentGhost,
     borderWidth: 1,
     borderColor: tokens.accentBorder,
     flexShrink: 0,
-  },
-  indexText: {
-    fontFamily: tokens.fontMono,
-    fontSize: tokens.textXs,
-    color: tokens.accentBase,
   },
   content: {
     flex: 1,
