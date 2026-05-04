@@ -6,7 +6,7 @@ import {
   TextInput as RNTextInput,
   type TextInputProps as RNTextInputProps,
 } from 'react-native'
-import { createThemedStyles, useThemedStyles } from '../theme'
+import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
 
 export interface TextInputProps extends Pick<RNTextInputProps,
@@ -37,6 +37,7 @@ export function TextInput({
   ...inputProps
 }: TextInputProps) {
   const styles = useThemedStyles(themedStyles)
+  const { tokens } = useTheme()
   const hasError = Boolean(error)
 
   return (
@@ -49,6 +50,7 @@ export function TextInput({
 
       <RNTextInput
         {...inputProps}
+        placeholderTextColor={disabled ? tokens.textDisabled : tokens.textMuted}
         editable={!disabled}
         autoCapitalize={inputProps.autoCapitalize ?? 'none'}
         autoCorrect={inputProps.autoCorrect ?? false}
