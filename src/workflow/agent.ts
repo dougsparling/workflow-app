@@ -9,10 +9,9 @@ polyfillWebCrypto()
 
 type MessageThread = BaseMessage[]
 
-type OnNextCallback = {
-  msg: BaseMessage
-  last: boolean
-}
+type OnNextCallback =
+  | { readonly type: 'message'; msg: BaseMessage; last: boolean }
+  | { readonly type: 'error'; error: Error }
 
 export type AgentDef = {
   name: string
@@ -26,7 +25,7 @@ export const runAgent = async (agent: AgentDef, prompt: string, callback: (_: On
     new SystemMessage(agent.systemPrompt),
     new HumanMessage(prompt),
   ]
-  messages.forEach((msg) => callback({ msg, last: false }))
+  messages.forEach((msg) => callback({ type: 'message', msg, last: false }))
 
   const model = await agent.model.factory()
   const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
@@ -43,20 +42,24 @@ export const runAgent = async (agent: AgentDef, prompt: string, callback: (_: On
         })()
       : model
 
-  while (true) {
-    const response = await readyModel.invoke(messages)
-    messages.push(response)
-    if (AIMessage.isInstance(response) && response.tool_calls?.length) {
-      // only tool calls require harness intervention for now
-      for (const call of response.tool_calls) {
-        const toolMsg = (await toolsByName[call.name].invoke(call)) as ToolMessage
-        callback({ msg: toolMsg, last: false })
-        messages.push(toolMsg)
+  try {
+    while (true) {
+      const response = await readyModel.invoke(messages)
+      messages.push(response)
+      if (AIMessage.isInstance(response) && response.tool_calls?.length) {
+        // only tool calls require harness intervention for now
+        for (const call of response.tool_calls) {
+          const toolMsg = (await toolsByName[call.name].invoke(call)) as ToolMessage
+          callback({ type: 'message', msg: toolMsg, last: false })
+          messages.push(toolMsg)
+        }
+      } else {
+        callback({ type: 'message', msg: response, last: true })
+        break
       }
-    } else {
-      callback({ msg: response, last: true })
-      break
     }
+  } catch (e) {
+    callback({ type: 'error', error: e instanceof Error ? e : new Error(String(e)) })
   }
 
   return messages

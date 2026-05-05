@@ -97,7 +97,7 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     paddingHorizontal: tokens.space3,
     paddingVertical: tokens.space2,
     includeFontPadding: false,
-    textAlignVertical: 'top' as const,
+    textAlignVertical: 'center' as const,
   },
   inputError: {
     borderColor: tokens.errorBase,

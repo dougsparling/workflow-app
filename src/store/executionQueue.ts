@@ -30,6 +30,7 @@ type ExecutionQueueStore = {
   
   _nextId: number
   _advance: () => void
+  _updateJob: (id: string, updater: (job: Job) => Job) => void
   _onMessage: (id: string, msg: BaseMessage) => void
   _onDone: (id: string, status: 'done' | 'error') => void
 }
@@ -60,41 +61,40 @@ export const useExecutionStore = create<ExecutionQueueStore>((set, get) => ({
     const job = get().jobs.find((j) => j.id === id)
     if (!job) return
     job.abort.abort()
-    set((s) => ({
-      jobs: s.jobs.map((j) => (j.id === id ? { ...j, status: 'error' as const } : j)),
-    }))
+    get()._updateJob(id, (j) => ({ ...j, status: 'error' as const }))
     get()._advance()
+  },
+
+  _updateJob: (id, updater) => {
+    set((s) => ({
+      jobs: s.jobs.map((j) => (j.id === id ? updater(j) : j)),
+    }))
   },
 
   _advance: () => {
     const next = get().jobs.find((j) => j.status === 'pending')
     if (!next) return
-    set((s) => ({
-      jobs: s.jobs.map((j) =>
-        j.id === next.id ? { ...j, status: 'running' as const, startedAt: Date.now() } : j
-      ),
-    }))
-    runAgent(next.def, next.prompt, ({ msg }) => {
-      get()._onMessage(next.id, msg)
+    get()._updateJob(next.id, (j) => ({ ...j, status: 'running' as const, startedAt: Date.now() }))
+    runAgent(next.def, next.prompt, (cb) => {
+      switch (cb.type) {
+        case 'message':
+          get()._onMessage(next.id, cb.msg)
+          if (cb.last) get()._onDone(next.id, 'done')
+          break
+        case 'error':
+          if (!next.abort.signal.aborted) get()._onDone(next.id, 'error')
+          break
+      }
     })
-      .then(() => get()._onDone(next.id, 'done'))
-      .catch(() => {
-        if (!next.abort.signal.aborted) get()._onDone(next.id, 'error')
-      })
+      .then(() => get()._advance())
   },
 
   _onMessage: (id, msg) => {
-    set((s) => ({
-      jobs: s.jobs.map((j) =>
-        j.id === id ? { ...j, messages: [...j.messages, { msg, ts: Date.now() }] } : j
-      ),
-    }))
+    get()._updateJob(id, (j) => ({ ...j, messages: [...j.messages, { msg, ts: Date.now() }] }))
   },
 
   _onDone: (id, status) => {
-    set((s) => ({
-      jobs: s.jobs.map((j) => (j.id === id ? { ...j, status } : j)),
-    }))
+    get()._updateJob(id, (j) => ({ ...j, status }))
     get()._advance()
   },
 }))

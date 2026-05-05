@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { deepseekApiKey } from '@workflow/models'
-import PrimaryButton from '@design/PrimaryButton/PrimaryButton'
 import {
   createThemedStyles,
   useTheme,
@@ -11,6 +10,8 @@ import type { ThemePreference } from '@design/theme'
 import { TextInput } from '@design/TextInput/TextInput'
 import Background from '@design/Background/Background'
 
+const KEY_REGEX = /^sk-[a-f0-9]{32}$/
+
 const THEME_OPTIONS: { label: string; value: ThemePreference }[] = [
   { label: 'Light', value: 'light' },
   { label: 'Dark', value: 'dark' },
@@ -19,44 +20,49 @@ const THEME_OPTIONS: { label: string; value: ThemePreference }[] = [
 
 export default function Settings() {
   const [apiKey, setApiKey] = useState(null as string | null)
-  const [saved, setSaved] = useState(false)
   const styles = useThemedStyles(themedStyles)
   const { themePreference, setThemePreference } = useTheme()
 
-  const handleSave = useCallback(async () => {
-    const key = apiKey?.trim() 
-    if (!key) return
-    try {
-      await deepseekApiKey.set(key)
-      setSaved(true)
-    } catch (e) {
-      console.log("failed to save DeepSeek API key", e)
-    }
-  }, [apiKey])
+  const trimmed = apiKey?.trim() ?? ''
+  const validity: 'empty' | 'invalid' | 'valid' =
+    !trimmed ? 'empty' : KEY_REGEX.test(trimmed) ? 'valid' : 'invalid'
 
   useEffect(() => {
     deepseekApiKey.get().then(setApiKey)
   }, [])
 
+  useEffect(() => {
+    if (validity === 'valid') {
+      deepseekApiKey.set(trimmed)
+    }
+  }, [validity, trimmed])
+
+  const statusLabel =
+    validity === 'empty' ? null :
+    validity === 'invalid' ? 'INVALID' :
+    'SAVED'
+
   return (
     <Background>
       <View style={styles.section}>
         <Text style={styles.label}>DeepSeek API Key</Text>
-        <TextInput
-          value={apiKey ?? ''}
-          onChangeText={(text) => { setApiKey(text); setSaved(false) }}
-          placeholder="sk-..."
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <PrimaryButton
-          label={saved ? 'Saved' : 'Save'}
-          icon={saved ? 'check' : undefined}
-          onPress={handleSave}
-          disabled={!apiKey?.trim() || saved}
-        />
+        <View style={styles.inputGroup}>
+          <TextInput
+            value={apiKey ?? ''}
+            onChangeText={setApiKey}
+            placeholder="sk-..."
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {statusLabel && (
+            <Text style={[styles.status, validity === 'invalid' ? styles.statusError : styles.statusOk]}>
+              {statusLabel}
+            </Text>
+          )}
+        </View>
       </View>
+      <View style={styles.divider} />
       <View style={styles.section}>
         <Text style={styles.label}>Theme</Text>
         <View style={styles.segmentRow}>
@@ -89,6 +95,14 @@ const themedStyles = createThemedStyles((tokens) => ({
   section: {
     gap: tokens.space3,
   },
+  inputGroup: {
+    gap: tokens.space1,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: tokens.borderDefault,
+    marginVertical: tokens.space6,
+  },
   label: {
     fontFamily: tokens.fontMono,
     fontSize: tokens.textSm,
@@ -119,5 +133,16 @@ const themedStyles = createThemedStyles((tokens) => ({
   },
   segmentLabelActive: {
     color: tokens.textInverse,
+  },
+  status: {
+    fontFamily: tokens.fontMono,
+    fontSize: tokens.textSm,
+    fontWeight: tokens.weightMedium,
+  },
+  statusError: {
+    color: tokens.errorBase,
+  },
+  statusOk: {
+    color: tokens.statusComplete,
   },
 }))
