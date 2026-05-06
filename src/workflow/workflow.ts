@@ -1,41 +1,73 @@
-export type Step<In, Out> = {
+import { type TSchema, type Static } from '@sinclair/typebox'
+import { Value } from '@sinclair/typebox/value'
+
+export type Step<In extends TSchema, Out extends TSchema> = {
   name: string
-  execute: (input: In) => Promise<Out>
+  input: In
+  output: Out
+  execute: (input: Static<In>) => Promise<Static<Out>>
 }
 
-export type Workflow<In, Out> = {
-  steps: Step<any, any>[]
-  run: (input: In) => Promise<Out>
+export type Workflow<In extends TSchema, Out extends TSchema> = {
+  steps: Step<TSchema, TSchema>[]
+  run: (input: Static<In>) => Promise<Static<Out>>
 }
 
-export type WorkflowBuilder<In, Out> = {
-  step: <Next>(name: string, fn: (input: Out) => Next | Promise<Next>) => WorkflowBuilder<In, Next>
+export type WorkflowBuilder<In extends TSchema, Out extends TSchema> = {
+  step: <Next extends TSchema>(
+    name: string,
+    schema: Next,
+    fn: (input: Static<Out>) => Static<Next> | Promise<Static<Next>>
+  ) => WorkflowBuilder<In, Next>
   create: () => Workflow<In, Out>
 }
 
-async function runSteps<In, Out>(steps: Step<any, any>[], input: In): Promise<Out> {
-  let result: any = input
-  for (const step of steps) {
-    result = await step.execute(result)
+function validate(schema: TSchema, value: unknown, stepName: string, direction: 'input' | 'output'): void {
+  if (!Value.Check(schema, value)) {
+    const errors = [...Value.Errors(schema, value)]
+    const message = errors.map(e => `${e.path || '(root)'}: ${e.message}`).join('; ')
+    throw new Error(`Step "${stepName}" ${direction} validation failed: ${message}`)
   }
-  return result as Out
 }
 
-function makeBuilder<In, Out>(steps: Step<any, any>[]): WorkflowBuilder<In, Out> {
+async function runSteps(steps: Step<TSchema, TSchema>[], input: unknown): Promise<unknown> {
+  let result: unknown = input
+  for (const step of steps) {
+    validate(step.input, result, step.name, 'input')
+    result = await step.execute(result as Static<TSchema>)
+    validate(step.output, result, step.name, 'output')
+  }
+  return result
+}
+
+function makeBuilder<In extends TSchema, Out extends TSchema>(
+  inputSchema: In,
+  steps: Step<TSchema, TSchema>[]
+): WorkflowBuilder<In, Out> {
   return {
-    step<Next>(name: string, fn: (input: Out) => Next | Promise<Next>): WorkflowBuilder<In, Next> {
-      const nextSteps = [...steps, { name, execute: fn as any }]
-      return makeBuilder<In, Next>(nextSteps)
+    step<Next extends TSchema>(
+      name: string,
+      schema: Next,
+      fn: (input: Static<Out>) => Static<Next> | Promise<Static<Next>>
+    ): WorkflowBuilder<In, Next> {
+      const currentInputSchema = steps.length > 0 ? steps[steps.length - 1].output : inputSchema
+      const newStep: Step<TSchema, TSchema> = {
+        name,
+        input: currentInputSchema,
+        output: schema,
+        execute: fn as (input: Static<TSchema>) => Promise<Static<TSchema>>,
+      }
+      return makeBuilder<In, Next>(inputSchema, [...steps, newStep])
     },
     create(): Workflow<In, Out> {
       return {
         steps,
-        run: (input: In) => runSteps<In, Out>(steps, input),
+        run: (input: Static<In>) => runSteps(steps, input) as Promise<Static<Out>>,
       }
     },
   }
 }
 
-export function workflow<In = void>(): WorkflowBuilder<In, In> {
-  return makeBuilder<In, In>([])
+export function workflow<In extends TSchema>(inputSchema: In): WorkflowBuilder<In, In> {
+  return makeBuilder<In, In>(inputSchema, [])
 }

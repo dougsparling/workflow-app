@@ -3,11 +3,11 @@ import type { Config } from "jest"
 const config: Config = {
   preset: "ts-jest",
   testEnvironment: "node",
-  roots: ["<rootDir>/app"],
+  roots: ["<rootDir>/src"],
   testMatch: ["**/*.test.ts"],
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1",
-    "^@workflow/(.*)$": "<rootDir>/app/workflow/$1",
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "^@workflow/(.*)$": "<rootDir>/src/workflow/$1",
   },
 }
 

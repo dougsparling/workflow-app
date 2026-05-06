@@ -1,4 +1,10 @@
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages'
+import {
+  AIMessage,
+  BaseMessage,
+  HumanMessage,
+  SystemMessage,
+  ToolMessage,
+} from '@langchain/core/messages'
 
 import { polyfillWebCrypto } from 'expo-standard-web-crypto'
 import { Model } from './models'
@@ -20,27 +26,22 @@ export type AgentDef = {
   systemPrompt: string
 }
 
-export const runAgent = async (agent: AgentDef, prompt: string, callback: (_: OnNextCallback) => void) => {
-  const messages: MessageThread = [
-    new SystemMessage(agent.systemPrompt),
-    new HumanMessage(prompt),
-  ]
+export const runAgent = async (
+  agent: AgentDef,
+  prompt: string,
+  callback: (_: OnNextCallback) => void,
+) => {
+  const messages: MessageThread = [new SystemMessage(agent.systemPrompt), new HumanMessage(prompt)]
   messages.forEach((msg) => callback({ type: 'message', msg, last: false }))
 
   const model = await agent.model.factory()
   const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
 
-  // TODO: cleanup
-  const readyModel =
-    agent.tools.length > 0
-      ? (() => {
-          if (!model.bindTools)
-            throw new Error(
-              `${agent.tools.length} tools given but not supported by ${agent.model.label}`,
-            )
-          return model.bindTools!(tools)
-        })()
-      : model
+  if (!model.bindTools && agent.tools.length > 0) {
+    throw new Error(`${agent.tools.length} tools given but not supported by ${agent.model.label}`)
+  }
+
+  const readyModel = model.bindTools?.(tools) ?? model
 
   try {
     while (true) {
