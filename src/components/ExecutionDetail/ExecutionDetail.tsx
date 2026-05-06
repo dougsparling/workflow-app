@@ -67,7 +67,7 @@ export default function ExecutionDetail({ executionId }: Props) {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={styles.agentName}>{job.agentName}</Text>
+          <Text style={styles.agentName}>{job.def.name}</Text>
           <Text style={styles.prompt} numberOfLines={2}>
             {job.prompt}
           </Text>

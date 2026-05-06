@@ -121,7 +121,7 @@ export default function Agents() {
   const handleRun = useCallback(
     (prompt: string) => {
       if (!selected) return
-      enqueue(selected.def.name, prompt, selected.def)
+      enqueue(selected.def, prompt)
       setSelected(null)
     },
     [selected, enqueue],

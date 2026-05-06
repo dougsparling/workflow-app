@@ -14,7 +14,6 @@ export type MessageEntry = {
 
 export type Job = {
   id: string
-  agentName: string
   prompt: string
   def: AgentDef
   messages: MessageEntry[]
@@ -25,10 +24,10 @@ export type Job = {
 
 type ExecutionQueueStore = {
   jobs: Job[]
-  enqueue: (agentName: string, prompt: string, def: AgentDef) => void
+  enqueue: (def: AgentDef, prompt: string) => void
   cancel: (id: string) => void
   
-  _nextId: number
+  _nextId: () => string
   _advance: () => void
   _updateJob: (id: string, updater: (job: Job) => Job) => void
   _onMessage: (id: string, msg: BaseMessage) => void
@@ -37,14 +36,15 @@ type ExecutionQueueStore = {
 
 export const useExecutionStore = create<ExecutionQueueStore>((set, get) => ({
   jobs: [],
-  _nextId: 1,
+  _nextId: (() => {
+    let nextId = 1
+    return () => String(nextId++)
+  })(),
 
-  enqueue: (agentName, prompt, def) => {
-    const id = String(get()._nextId)
-    set((s) => ({ _nextId: s._nextId + 1 }))
+  enqueue: (def, prompt) => {
+    const id = get()._nextId()
     const job: Job = {
       id,
-      agentName,
       prompt,
       def,
       messages: [],

@@ -19,7 +19,7 @@ function JobCard({ job, index, onCancel }: { job: Job; index: number; onCancel: 
   return (
     <View style={styles.card}>
       <ActionRow
-        title={job.agentName}
+        title={job.def.name}
         status={job.status}
         time={duration}
       />

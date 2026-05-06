@@ -50,14 +50,13 @@ function makeBuilder<In extends TSchema, Out extends TSchema>(
       schema: Next,
       fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema) => Static<Next> | Promise<Static<Next>>
     ): WorkflowBuilder<In, Next> {
-      const currentInputSchema = steps.length > 0 ? steps[steps.length - 1].output : initialSchema
-      const newStep: Step<TSchema, TSchema> = {
+      const inputSchema = steps.length > 0 ? steps[steps.length - 1].output : initialSchema
+      return makeBuilder<In, Next>(initialSchema, [...steps, {
         name,
-        input: currentInputSchema,
+        input: inputSchema,
         output: schema,
         execute: (input, inputSchema, outputSchema) => Promise.resolve(fn(input as Static<Out>, inputSchema, outputSchema)),
-      }
-      return makeBuilder<In, Next>(initialSchema, [...steps, newStep])
+      }])
     },
     create(): Workflow<In, Out> {
       return {
