@@ -5,7 +5,7 @@ import Background from '@design/Background/Background'
 import BottomSheet from '@design/BottomSheet/BottomSheet'
 import Button from '@design/Button/Button'
 import EmptyState from '@design/EmptyState/EmptyState'
-import StepRow from '@design/StepRow/StepRow'
+import ActionRow from '@design/ActionRow/ActionRow'
 import { createThemedStyles, useThemedStyles } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import ExecutionDetail from '@components/ExecutionDetail/ExecutionDetail'
@@ -18,10 +18,10 @@ function JobCard({ job, index, onCancel }: { job: Job; index: number; onCancel: 
 
   return (
     <View style={styles.card}>
-      <StepRow
-        name={job.agentName}
+      <ActionRow
+        title={job.agentName}
         status={job.status}
-        duration={duration}
+        time={duration}
       />
       {job.status === 'running' && (
         <View style={styles.cancelRow}>

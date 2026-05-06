@@ -135,8 +135,7 @@ export default function Agents() {
         renderItem={({ item }) => (
           <ActionRow
             title={item.def.name}
-            sub={item.desc}
-            sub2={`${item.def.model.label} — ${item.def.tools.length} tool(s)`}
+            subtitles={[item.desc, `${item.def.model.label} — ${item.def.tools.length} tool(s)`]}
             trailing={<Button label="Run" icon="play" onPress={() => setSelected(item)} />}
           />
         )}

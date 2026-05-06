@@ -2,8 +2,7 @@ import { useRef, useEffect } from 'react'
 import { ActivityIndicator, FlatList, Text, View } from 'react-native'
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages'
 import StatusBadge from '@design/StatusBadge/StatusBadge'
-import StepRow from '@design/StepRow/StepRow'
-import type { FeatherIconName } from '@design/StepRow/StepRow'
+import ActionRow, { type FeatherIconName } from '@design/ActionRow/ActionRow'
 import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import { useExecutionStore } from '@store/executionQueue'
@@ -81,8 +80,8 @@ export default function ExecutionDetail({ executionId }: Props) {
         data={filtered}
         keyExtractor={(_, i) => String(i)}
         renderItem={({ item }) => (
-          <StepRow
-            name={messageLabel(item.msg)}
+          <ActionRow
+            title={messageLabel(item.msg)}
             status="complete"
             icon={messageIcon(item.msg)}
             iconColor={messageIconColor(item.msg, tokens)}

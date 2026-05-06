@@ -5,35 +5,42 @@ import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
 import StatusBadge, { type ExecutionStatus } from '../StatusBadge/StatusBadge'
 
+export type FeatherIconName = React.ComponentProps<typeof Feather>['name']
+
 interface Props {
   title: string
-  sub?: string
-  sub2?: string
+  subtitles?: string[]
   status?: ExecutionStatus
   time?: string
   selected?: boolean
   accentColor?: string
+  icon?: FeatherIconName
+  iconColor?: string
   trailing?: ReactNode
   onPress?: () => void
 }
 
 export default function ActionRow({
   title,
-  sub,
-  sub2,
+  subtitles: subs,
   status,
   time,
   selected = false,
   accentColor,
+  icon,
+  iconColor,
   trailing,
   onPress,
 }: Props) {
   const { tokens: t } = useTheme()
   const styles = useThemedStyles(themedStyles)
+  const isRunning = status === 'running'
   const borderLeft = selected
     ? { borderLeftWidth: t.borderWidthThick, borderLeftColor: t.accentBase }
     : accentColor
     ? { borderLeftWidth: t.borderWidthThick, borderLeftColor: accentColor }
+    : isRunning
+    ? { borderLeftWidth: t.borderWidthThick, borderLeftColor: t.statusRunning }
     : {}
 
   return (
@@ -43,13 +50,20 @@ export default function ActionRow({
         styles.row,
         borderLeft,
         selected && styles.rowSelected,
+        isRunning && styles.rowRunning,
         onPress && pressed && styles.rowPressed,
       ]}
     >
+      {icon && (
+        <View style={styles.iconBadge}>
+          <Feather name={icon} size={14} color={iconColor ?? t.accentBase} />
+        </View>
+      )}
       <View style={styles.left}>
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
-        {sub ? <Text style={styles.sub} numberOfLines={1}>{sub}</Text> : null}
-        {sub2 ? <Text style={styles.sub} numberOfLines={1}>{sub2}</Text> : null}
+        {subs?.map((s, i) => (
+          <Text key={i} style={styles.sub} numberOfLines={1}>{s}</Text>
+        ))}
       </View>
       {(status || time) ? (
         <View style={styles.right}>
@@ -57,9 +71,7 @@ export default function ActionRow({
           {time ? <Text style={styles.time}>{time}</Text> : null}
         </View>
       ) : null}
-      {trailing !== undefined
-        ? trailing
-        : <Feather name="chevron-right" size={16} color={t.textDisabled} />}
+      {trailing}
     </Pressable>
   )
 }
@@ -80,8 +92,21 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     backgroundColor: tokens.bgElevated,
     paddingHorizontal: tokens.space3,
   },
+  rowRunning: {
+    paddingLeft: tokens.space3,
+  },
   rowPressed: {
     backgroundColor: tokens.bgOverlay,
+  },
+  iconBadge: {
+    width: tokens.space6,
+    height: tokens.space6,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: tokens.accentGhost,
+    borderWidth: 1,
+    borderColor: tokens.accentBorder,
+    flexShrink: 0,
   },
   left: {
     flex: 1,
