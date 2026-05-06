@@ -44,6 +44,16 @@ describe("workflow", () => {
       )
     })
 
+    it("throws on invalid intermediate", async () => {
+      const w = workflow(Type.String())
+        .step("copy", Type.String(), (str) => str + str)
+        .step("uppercase", Type.String({pattern: "^[A-Z]+$"}), (str) => str.toUpperCase())
+        .create()
+      await expect(w.run("hello123")).rejects.toThrow(
+        'Step "uppercase" output validation failed'
+      )
+    })
+
     it("accepts complex types", async () => {
       const PersonSchema = Type.Object({
         name: Type.String(),

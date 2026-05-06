@@ -5,7 +5,7 @@ export type Step<In extends TSchema, Out extends TSchema> = {
   name: string
   input: In
   output: Out
-  execute: (input: Static<In>) => Promise<Static<Out>>
+  execute: (input: Static<In>, inputSchema: TSchema, outputSchema: TSchema) => Promise<Static<Out>>
 }
 
 export type Workflow<In extends TSchema, Out extends TSchema> = {
@@ -17,7 +17,7 @@ export type WorkflowBuilder<In extends TSchema, Out extends TSchema> = {
   step: <Next extends TSchema>(
     name: string,
     schema: Next,
-    fn: (input: Static<Out>) => Static<Next> | Promise<Static<Next>>
+    fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema) => Static<Next> | Promise<Static<Next>>
   ) => WorkflowBuilder<In, Next>
   create: () => Workflow<In, Out>
 }
@@ -34,30 +34,30 @@ async function runSteps(steps: Step<TSchema, TSchema>[], input: unknown): Promis
   let result: unknown = input
   for (const step of steps) {
     validate(step.input, result, step.name, 'input')
-    result = await step.execute(result as Static<TSchema>)
+    result = await step.execute(result as Static<TSchema>, step.input, step.output)
     validate(step.output, result, step.name, 'output')
   }
   return result
 }
 
 function makeBuilder<In extends TSchema, Out extends TSchema>(
-  inputSchema: In,
+  initialSchema: In,
   steps: Step<TSchema, TSchema>[]
 ): WorkflowBuilder<In, Out> {
   return {
     step<Next extends TSchema>(
       name: string,
       schema: Next,
-      fn: (input: Static<Out>) => Static<Next> | Promise<Static<Next>>
+      fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema) => Static<Next> | Promise<Static<Next>>
     ): WorkflowBuilder<In, Next> {
-      const currentInputSchema = steps.length > 0 ? steps[steps.length - 1].output : inputSchema
+      const currentInputSchema = steps.length > 0 ? steps[steps.length - 1].output : initialSchema
       const newStep: Step<TSchema, TSchema> = {
         name,
         input: currentInputSchema,
         output: schema,
-        execute: fn as (input: Static<TSchema>) => Promise<Static<TSchema>>,
+        execute: (input, inputSchema, outputSchema) => Promise.resolve(fn(input as Static<Out>, inputSchema, outputSchema)),
       }
-      return makeBuilder<In, Next>(inputSchema, [...steps, newStep])
+      return makeBuilder<In, Next>(initialSchema, [...steps, newStep])
     },
     create(): Workflow<In, Out> {
       return {

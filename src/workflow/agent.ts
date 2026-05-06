@@ -6,12 +6,8 @@ import {
   ToolMessage,
 } from '@langchain/core/messages'
 
-import { polyfillWebCrypto } from 'expo-standard-web-crypto'
 import { Model } from './models'
-import tools, { Tool } from './tools'
-
-// required for langchain UUID
-polyfillWebCrypto()
+import { Tool } from './tools'
 
 type MessageThread = BaseMessage[]
 
@@ -35,13 +31,13 @@ export const runAgent = async (
   messages.forEach((msg) => callback({ type: 'message', msg, last: false }))
 
   const model = await agent.model.factory()
-  const toolsByName = Object.fromEntries(tools.map((tool) => [tool.name, tool]))
+  const toolsByName = Object.fromEntries(agent.tools.map((t) => [t.name, t]))
 
   if (!model.bindTools && agent.tools.length > 0) {
     throw new Error(`${agent.tools.length} tools given but not supported by ${agent.model.label}`)
   }
 
-  const readyModel = model.bindTools?.(tools) ?? model
+  const readyModel = model.bindTools?.(agent.tools) ?? model
 
   try {
     while (true) {
@@ -50,9 +46,12 @@ export const runAgent = async (
       if (AIMessage.isInstance(response) && response.tool_calls?.length) {
         // only tool calls require harness intervention for now
         for (const call of response.tool_calls) {
-          const toolMsg = (await toolsByName[call.name].invoke(call)) as ToolMessage
-          callback({ type: 'message', msg: toolMsg, last: false })
+          const handler = toolsByName[call.name]
+          const toolMsg = handler
+            ? ((await handler.invoke(call)) as ToolMessage)
+            : new ToolMessage({ content: `Unknown tool: ${call.name}`, tool_call_id: call.id ?? '' })
           messages.push(toolMsg)
+          callback({ type: 'message', msg: toolMsg, last: false })
         }
       } else {
         callback({ type: 'message', msg: response, last: true })

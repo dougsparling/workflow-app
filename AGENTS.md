@@ -6,6 +6,7 @@ This is a **React Native (Expo) mobile app** called "workflow-app" that demonstr
 
 - **React Native / Expo** — Cross-platform mobile app (iOS/Android/Web) using Expo SDK 54 with file-based routing via `expo-router`.
 - **LangChain.js** — Integrates `@langchain/core`, `@langchain/openai`, and `@langchain/deepseek` to build an agentic loop.
+- **TypeBox** — Runtime schema validation for workflow step I/O, with JSON Schema reflection for agent context.
 - **Zod** — Schema validation for tool definitions.
 - **Zustand** — Lightweight state management for the agent execution queue and workflow execution state.
 - **pnpm** — Package manager (preferred over npm/npx).
@@ -17,6 +18,7 @@ This is a **React Native (Expo) mobile app** called "workflow-app" that demonstr
 - Runs a **ReAct-style agent loop** where the LLM can call tools, get results, and continue reasoning until it produces a final answer.
 - Execution state is managed via a **Zustand store** (`src/store/executionQueue.ts`) that handles job enqueueing, cancellation, message streaming, and sequential job advancement.
 - Inspired by **[Mastra-style workflows](https://mastra.ai/docs/workflows/overview)** — a framework for building structured AI agent workflows — but implemented on top of LangChain.js rather than using Mastra directly.
+- Workflow steps carry TypeBox input/output schemas at runtime, enabling schema reflection, validation, and agent-aware steps that receive their schemas automatically via the executor signature.
 
 ## Patches
 
@@ -68,10 +70,11 @@ The design system is built around a theme context (`theme.tsx`) that provides li
 
 ## Key Files
 
-- `src/workflow/agent.ts` — Core agentic loop and tool definitions (LangChain.js ReAct agent).
+- `src/workflow/agent.ts` — Core agentic loop (`runAgent`) with tool dispatch and streaming callback.
+- `src/workflow/agentstep.ts` — Binds an agent to a workflow step: injects workflow control tools (`read_input`, `complete_step`, `fail_step`), extends the system prompt with input/output schemas, and resolves via an outcome state object after `runAgent` completes. Used as `.step("name", Schema, agentStep(agent))`.
 - `src/workflow/models.ts` — Model configurations: local Qwen (via ChatOpenAI) and DeepSeek Flash (via ChatDeepSeek), with AsyncStorage-persisted API key.
 - `src/workflow/tools.ts` — Custom tool definitions: `get_weather` and `get_exchange_rate`.
-- `src/workflow/workflow.ts` — Type-safe workflow builder with composable steps (Mastra-inspired).
+- `src/workflow/workflow.ts` — Type-safe workflow builder with composable steps (Mastra-inspired). Each step's executor receives `(input, inputSchema, outputSchema)` — plain lambdas can ignore the schema params
 - `src/workflow/workflow.test.ts` — Jest tests for the workflow builder.
 - `src/store/executionQueue.ts` — Zustand store managing job lifecycle (enqueue, cancel, sequential execution, message streaming).
 - `src/app/_layout.tsx` — Root layout wrapping AssetLoader, ThemeProvider, and Stack navigator.
