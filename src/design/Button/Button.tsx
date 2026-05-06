@@ -1,5 +1,4 @@
-// components/PrimaryButton/PrimaryButton.tsx
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Pressable, Text } from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
 import type { ComponentProps } from 'react'
@@ -12,11 +11,11 @@ interface Props {
   label: string
   icon?: FeatherName
   onPress?: () => void
-  variant?: 'primary' | 'ghost' | 'destructive'
+  variant?: 'primary' | 'ghost' | 'destructive' | 'secondary'
   disabled?: boolean
 }
 
-export default function PrimaryButton({
+export default function Button({
   label,
   icon,
   onPress,
@@ -32,7 +31,7 @@ export default function PrimaryButton({
     variant === 'primary'     ? t.bgBase :
     variant === 'ghost'       ? t.accentBase :
     variant === 'destructive' ? '#fff' :
-    t.bgBase
+    t.textPrimary
 
   return (
     <Pressable
@@ -45,9 +44,11 @@ export default function PrimaryButton({
         variant === 'primary'     && styles.variantPrimary,
         variant === 'ghost'       && styles.variantGhost,
         variant === 'destructive' && styles.variantDestructive,
+        variant === 'secondary'   && styles.variantSecondary,
         pressed && variant === 'primary'     && styles.pressedPrimary,
         pressed && variant === 'ghost'       && styles.pressedGhost,
         pressed && variant === 'destructive' && styles.pressedDestructive,
+        pressed && variant === 'secondary'   && styles.pressedSecondary,
         disabled && styles.disabled,
       ]}
     >
@@ -64,7 +65,7 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    gap: tokens.space1 + 2,
+    gap: tokens.space1,
     paddingHorizontal: tokens.space5,
   },
   variantPrimary: {
@@ -78,6 +79,12 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   variantDestructive: {
     backgroundColor: tokens.errorBase,
   },
+  variantSecondary: {
+    alignSelf: 'flex-start' as const,
+    backgroundColor: tokens.bgSurface,
+    borderWidth: 1,
+    borderColor: tokens.borderDefault,
+  },
   pressedPrimary: {
     backgroundColor: tokens.accentDim,
   },
@@ -89,6 +96,10 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     borderWidth: 1,
     borderColor: tokens.errorBorder,
   },
+  pressedSecondary: {
+    backgroundColor: tokens.bgOverlay,
+    borderColor: tokens.borderStrong,
+  },
   disabled: {
     backgroundColor: tokens.bgSurface,
     borderWidth: 1,
@@ -96,7 +107,7 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   },
   label: {
     fontFamily: tokens.fontMono,
-    fontSize: tokens.textBase - 1,
+    fontSize: tokens.textBase,
     fontWeight: tokens.weightMedium,
     letterSpacing: 0.3,
   },

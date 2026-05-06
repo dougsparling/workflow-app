@@ -1,5 +1,4 @@
-// components/ListRow/ListRow.tsx
-import React from 'react'
+import type { ReactNode } from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
@@ -9,20 +8,24 @@ import StatusBadge, { type ExecutionStatus } from '../StatusBadge/StatusBadge'
 interface Props {
   title: string
   sub?: string
+  sub2?: string
   status?: ExecutionStatus
   time?: string
   selected?: boolean
   accentColor?: string
+  trailing?: ReactNode
   onPress?: () => void
 }
 
-export default function ListRow({
+export default function ActionRow({
   title,
   sub,
+  sub2,
   status,
   time,
   selected = false,
   accentColor,
+  trailing,
   onPress,
 }: Props) {
   const { tokens: t } = useTheme()
@@ -40,18 +43,23 @@ export default function ListRow({
         styles.row,
         borderLeft,
         selected && styles.rowSelected,
-        pressed && styles.rowPressed,
+        onPress && pressed && styles.rowPressed,
       ]}
     >
       <View style={styles.left}>
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
         {sub ? <Text style={styles.sub} numberOfLines={1}>{sub}</Text> : null}
+        {sub2 ? <Text style={styles.sub} numberOfLines={1}>{sub2}</Text> : null}
       </View>
-      <View style={styles.right}>
-        {status ? <StatusBadge status={status} /> : null}
-        {time ? <Text style={styles.time}>{time}</Text> : null}
-      </View>
-      <Feather name="chevron-right" size={16} color={t.textDisabled} />
+      {(status || time) ? (
+        <View style={styles.right}>
+          {status ? <StatusBadge status={status} /> : null}
+          {time ? <Text style={styles.time}>{time}</Text> : null}
+        </View>
+      ) : null}
+      {trailing !== undefined
+        ? trailing
+        : <Feather name="chevron-right" size={16} color={t.textDisabled} />}
     </Pressable>
   )
 }
@@ -70,14 +78,14 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   },
   rowSelected: {
     backgroundColor: tokens.bgElevated,
-    paddingHorizontal: tokens.space3 + 2, // compensate for left border
+    paddingHorizontal: tokens.space3,
   },
   rowPressed: {
     backgroundColor: tokens.bgOverlay,
   },
   left: {
     flex: 1,
-    gap: 2,
+    gap: tokens.space1,
     minWidth: 0,
   },
   title: {
@@ -94,7 +102,7 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   },
   right: {
     alignItems: 'flex-end' as const,
-    gap: 3,
+    gap: tokens.space1,
     flexShrink: 0,
   },
   time: {

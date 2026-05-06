@@ -5,7 +5,7 @@ import type { BaseMessage } from '@langchain/core/messages'
 import type { AgentDef } from '@workflow/agent'
 import { runAgent } from '@workflow/agent'
 
-type JobStatus = 'pending' | 'running' | 'done' | 'error'
+type JobStatus = 'pending' | 'running' | 'complete' | 'failed'
 
 export type MessageEntry = {
   msg: BaseMessage
@@ -32,7 +32,7 @@ type ExecutionQueueStore = {
   _advance: () => void
   _updateJob: (id: string, updater: (job: Job) => Job) => void
   _onMessage: (id: string, msg: BaseMessage) => void
-  _onDone: (id: string, status: 'done' | 'error') => void
+  _onDone: (id: string, status: 'complete' | 'failed') => void
 }
 
 export const useExecutionStore = create<ExecutionQueueStore>((set, get) => ({
@@ -61,7 +61,7 @@ export const useExecutionStore = create<ExecutionQueueStore>((set, get) => ({
     const job = get().jobs.find((j) => j.id === id)
     if (!job) return
     job.abort.abort()
-    get()._updateJob(id, (j) => ({ ...j, status: 'error' as const }))
+    get()._updateJob(id, (j) => ({ ...j, status: 'failed' as const }))
     get()._advance()
   },
 
@@ -79,10 +79,10 @@ export const useExecutionStore = create<ExecutionQueueStore>((set, get) => ({
       switch (cb.type) {
         case 'message':
           get()._onMessage(next.id, cb.msg)
-          if (cb.last) get()._onDone(next.id, 'done')
+          if (cb.last) get()._onDone(next.id, 'complete')
           break
         case 'error':
-          if (!next.abort.signal.aborted) get()._onDone(next.id, 'error')
+          if (!next.abort.signal.aborted) get()._onDone(next.id, 'failed')
           break
       }
     })

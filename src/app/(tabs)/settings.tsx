@@ -1,14 +1,12 @@
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import { useEffect, useState } from 'react'
 import { deepseekApiKey } from '@workflow/models'
-import {
-  createThemedStyles,
-  useTheme,
-  useThemedStyles,
-} from '@design/theme'
+import { createThemedStyles, useTheme, useThemedStyles } from '@design/theme'
 import type { ThemePreference } from '@design/theme'
 import { TextInput } from '@design/TextInput/TextInput'
 import Background from '@design/Background/Background'
+import SectionLabel from '@design/SectionLabel/SectionLabel'
+import MultiToggle from '@design/MultiToggle/MultiToggle'
 
 const KEY_REGEX = /^sk-[a-f0-9]{32}$/
 
@@ -45,7 +43,7 @@ export default function Settings() {
   return (
     <Background>
       <View style={styles.section}>
-        <Text style={styles.label}>DeepSeek API Key</Text>
+        <SectionLabel>DeepSeek API Key</SectionLabel>
         <View style={styles.inputGroup}>
           <TextInput
             value={apiKey ?? ''}
@@ -64,28 +62,12 @@ export default function Settings() {
       </View>
       <View style={styles.divider} />
       <View style={styles.section}>
-        <Text style={styles.label}>Theme</Text>
-        <View style={styles.segmentRow}>
-          {THEME_OPTIONS.map(({ label, value }) => (
-            <Pressable
-              key={value}
-              style={[
-                styles.segment,
-                themePreference === value && styles.segmentActive,
-              ]}
-              onPress={() => setThemePreference(value)}
-            >
-              <Text
-                style={[
-                  styles.segmentLabel,
-                  themePreference === value && styles.segmentLabelActive,
-                ]}
-              >
-                {label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        <SectionLabel>Theme</SectionLabel>
+        <MultiToggle
+          options={THEME_OPTIONS}
+          value={themePreference}
+          onChange={setThemePreference}
+        />
       </View>
     </Background>
   )
@@ -102,37 +84,6 @@ const themedStyles = createThemedStyles((tokens) => ({
     height: 1,
     backgroundColor: tokens.borderDefault,
     marginVertical: tokens.space6,
-  },
-  label: {
-    fontFamily: tokens.fontMono,
-    fontSize: tokens.textSm,
-    fontWeight: tokens.weightMedium,
-    color: tokens.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: tokens.trackingWide,
-  },
-  segmentRow: {
-    flexDirection: 'row',
-    borderRadius: tokens.radiusSm,
-    borderWidth: tokens.borderWidthDefault,
-    borderColor: tokens.borderDefault,
-    overflow: 'hidden',
-  },
-  segment: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: tokens.space3,
-  },
-  segmentActive: {
-    backgroundColor: tokens.accentBase,
-  },
-  segmentLabel: {
-    fontSize: tokens.textBase,
-    color: tokens.textSecondary,
-    fontWeight: tokens.weightMedium,
-  },
-  segmentLabelActive: {
-    color: tokens.textInverse,
   },
   status: {
     fontFamily: tokens.fontMono,

@@ -38,17 +38,21 @@ There's a small patch to `@langchain/core` (at `patches/@langchain__core@1.1.41.
 The design system is built around a theme context (`theme.tsx`) that provides light/dark mode tokens and a set of reusable themed components:
 
 - **`theme.tsx`** — Theme provider (`ThemeProvider`), `useTheme` hook, `useThemedStyles` / `createThemedStyles` utilities, and full design tokens (typography, spacing, borders, animation, colors) for both dark (phosphor-green on deep charcoal) and light (warm paper) themes.
+- **`ActionRow/ActionRow.tsx`** — Pressable list row with title, up to two subtitles, status badge, time, optional accent border, and a `trailing` slot (defaults to a chevron).
 - **`Background/Background.tsx`** — Full-screen container with themed background color and standard padding.
 - **`BottomSheet/BottomSheet.tsx`** — Animated modal bottom sheet with backdrop press-to-dismiss.
-- **`Label/Label.tsx`** — Themed text component with `primary` / `secondary` types and `enabled` state.
-- **`ListRow/ListRow.tsx`** — Pressable list row with title, subtitle, status badge, time, and optional accent border.
+- **`Button/Button.tsx`** — Themed button with `primary`, `ghost`, `destructive`, and `secondary` variants, optional icon, and press/disabled states.
+- **`EmptyState/EmptyState.tsx`** — Centered placeholder with a single muted message string.
 - **`LogLine/LogLine.tsx`** — Log entry row with timestamp, level badge (INFO/WARN/ERROR/DEBUG), and message.
-- **`PrimaryButton/PrimaryButton.tsx`** — Themed button with `primary`, `ghost`, and `destructive` variants, optional icon, and press/disabled states.
-- **`SecondaryButton/SecondaryButton.tsx`** — Outlined button with press/disabled states and optional icon.
-- **`SectionLabel/SectionLabel.tsx`** — Uppercased section header label.
+- **`MultiToggle/MultiToggle.tsx`** — Segmented toggle control for selecting among a fixed set of labeled options.
+- **`SectionLabel/SectionLabel.tsx`** — Uppercased section header label (no horizontal padding; relies on parent container for layout padding).
 - **`StatusBadge/StatusBadge.tsx`** — Status indicator with colored dot and label for `running`, `complete`, `pending`, `failed`, `idle`, `stopped` states.
-- **`StepRow/StepRow.tsx`** — Workflow step row with index badge, name, duration, and status badge; highlights running steps with a left accent border.
+- **`StepRow/StepRow.tsx`** — Workflow step row with icon badge, name, duration, and status badge; highlights running steps with a left accent border.
 - **`TextInput/TextInput.tsx`** — Themed text input with label, hint, error state, and disabled state.
+
+### Style rules
+
+- **Use token values directly — no arithmetic.** Never write `tokens.space2 + 2` or `tokens.textBase - 1` in style definitions. If the available tokens don't fit, snap to the nearest token and flag it for a token addition instead.
 
 ## TSConfig Path Aliases
 

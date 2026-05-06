@@ -44,9 +44,9 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   row: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: tokens.space2 + 2,
+    gap: tokens.space2,
     paddingHorizontal: tokens.space4,
-    paddingVertical: tokens.space2 + 2,
+    paddingVertical: tokens.space2,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: tokens.borderSubtle,
     backgroundColor: tokens.bgSurface,
@@ -57,8 +57,8 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     paddingLeft: tokens.space3,
   },
   iconBadge: {
-    width: tokens.space6 + 4,
-    height: tokens.space6 + 4,
+    width: tokens.space6,
+    height: tokens.space6,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     backgroundColor: tokens.accentGhost,
@@ -72,7 +72,7 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   },
   name: {
     fontFamily: tokens.fontMono,
-    fontSize: tokens.textBase - 1,
+    fontSize: tokens.textBase,
     fontWeight: tokens.weightMedium,
     color: tokens.textPrimary,
   },

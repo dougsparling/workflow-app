@@ -33,7 +33,7 @@ export default function LogLine({ time, level, message }: Props) {
 const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   row: {
     flexDirection: 'row' as const,
-    gap: tokens.space2 + 2,
+    gap: tokens.space2,
     paddingHorizontal: tokens.space4,
     paddingVertical: 3,
   },

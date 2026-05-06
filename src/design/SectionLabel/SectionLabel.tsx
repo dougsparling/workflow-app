@@ -1,5 +1,3 @@
-// components/SectionLabel/SectionLabel.tsx
-import React from 'react'
 import { View, Text } from 'react-native'
 import { createThemedStyles, useThemedStyles } from '../theme'
 import type { ThemeTokens } from '../theme'
@@ -19,13 +17,12 @@ export default function SectionLabel({ children }: Props) {
 
 const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
   container: {
-    paddingHorizontal: tokens.space4,
-    paddingTop: tokens.space2 + 2,
-    paddingBottom: tokens.space1 + 2,
+    paddingTop: tokens.space2,
+    paddingBottom: tokens.space1,
   },
   text: {
     fontFamily: tokens.fontMono,
-    fontSize: tokens.textXs - 1,
+    fontSize: tokens.textXs,
     fontWeight: tokens.weightMedium,
     color: tokens.textDisabled,
     letterSpacing: tokens.trackingWidest,

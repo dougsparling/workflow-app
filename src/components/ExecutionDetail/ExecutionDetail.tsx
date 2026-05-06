@@ -4,7 +4,6 @@ import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/
 import StatusBadge from '@design/StatusBadge/StatusBadge'
 import StepRow from '@design/StepRow/StepRow'
 import type { FeatherIconName } from '@design/StepRow/StepRow'
-import type { ExecutionStatus } from '@design/StatusBadge/StatusBadge'
 import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import { useExecutionStore } from '@store/executionQueue'
@@ -45,12 +44,6 @@ function messageLabel(msg: HumanMessage | AIMessage | ToolMessage): string {
   return 'Step'
 }
 
-function jobToStatus(status: string): ExecutionStatus {
-  if (status === 'done') return 'complete'
-  if (status === 'error') return 'failed'
-  return status as ExecutionStatus
-}
-
 export default function ExecutionDetail({ executionId }: Props) {
   const job = useExecutionStore((s) => s.jobs.find((j) => j.id === executionId))
   const { tokens } = useTheme()
@@ -80,14 +73,14 @@ export default function ExecutionDetail({ executionId }: Props) {
             {job.prompt}
           </Text>
         </View>
-        <StatusBadge status={jobToStatus(job.status)} />
+        <StatusBadge status={job.status} />
       </View>
 
       <FlatList
         ref={listRef}
         data={filtered}
         keyExtractor={(_, i) => String(i)}
-        renderItem={({ item, index }) => (
+        renderItem={({ item }) => (
           <StepRow
             name={messageLabel(item.msg)}
             status="complete"

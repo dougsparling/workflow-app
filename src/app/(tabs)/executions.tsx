@@ -1,21 +1,15 @@
 import { useState } from 'react'
-import { FlatList, Pressable, Text, View } from 'react-native'
+import { FlatList, Pressable, View } from 'react-native'
 import { ToolMessage } from '@langchain/core/messages'
 import Background from '@design/Background/Background'
 import BottomSheet from '@design/BottomSheet/BottomSheet'
-import PrimaryButton from '@design/PrimaryButton/PrimaryButton'
+import Button from '@design/Button/Button'
+import EmptyState from '@design/EmptyState/EmptyState'
 import StepRow from '@design/StepRow/StepRow'
-import type { ExecutionStatus } from '@design/StatusBadge/StatusBadge'
 import { createThemedStyles, useThemedStyles } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import ExecutionDetail from '@components/ExecutionDetail/ExecutionDetail'
 import { type Job, useExecutionStore } from '@store/executionQueue'
-
-function jobBadgeStatus(status: Job['status']): ExecutionStatus {
-  if (status === 'done') return 'complete'
-  if (status === 'error') return 'failed'
-  return status
-}
 
 function JobCard({ job, index, onCancel }: { job: Job; index: number; onCancel: () => void }) {
   const styles = useThemedStyles(themedStyles)
@@ -26,12 +20,12 @@ function JobCard({ job, index, onCancel }: { job: Job; index: number; onCancel: 
     <View style={styles.card}>
       <StepRow
         name={job.agentName}
-        status={jobBadgeStatus(job.status)}
+        status={job.status}
         duration={duration}
       />
       {job.status === 'running' && (
         <View style={styles.cancelRow}>
-          <PrimaryButton label="Cancel" variant="ghost" onPress={onCancel} />
+          <Button label="Cancel" variant="ghost" onPress={onCancel} />
         </View>
       )}
     </View>
@@ -47,9 +41,7 @@ export default function Executions() {
   if (jobs.length === 0) {
     return (
       <Background>
-        <View style={styles.empty}>
-          <Text style={styles.emptyText}>No executions yet.</Text>
-        </View>
+        <EmptyState message="No executions yet." />
       </Background>
     )
   }
@@ -86,15 +78,5 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     paddingHorizontal: tokens.space4,
     paddingTop: tokens.space1,
     alignItems: 'flex-end' as const,
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  emptyText: {
-    fontFamily: tokens.fontMono,
-    fontSize: tokens.textSm,
-    color: tokens.textDisabled,
   },
 }))
