@@ -1,9 +1,16 @@
+import { Platform } from 'react-native'
 import { BaseChatModel } from "@langchain/core/language_models/chat_models"
 import { ChatDeepSeek } from "@langchain/deepseek"
 import { ChatOpenAI } from "@langchain/openai"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const DEEPSEEK_KEY_STORAGE = 'deepseek_api_key'
+
+const localBaseUrl = Platform.select({
+  android: 'http://10.0.2.2:8080/v1',
+  ios: 'http://localhost:8080/v1',
+  default: 'http://localhost:8080/v1',
+})
 
 export type Model = {
   label: string,
@@ -14,8 +21,9 @@ const makeQwen = async () => new ChatOpenAI({
   model: 'local-qwen-3.6',
   apiKey: 'nil',
   configuration: {
-    baseURL: 'http://10.0.2.2:8080/v1',
+    baseURL: localBaseUrl,
   },
+  timeout: 30000,
   modelKwargs: { enable_thinking: true },
 })
 
@@ -29,6 +37,7 @@ const makeDeepSeek = async () => {
   return new ChatDeepSeek({
     model: 'deepseek-v4-flash',
     apiKey,
+    timeout: 30000,
   })
 }
 

@@ -1,4 +1,4 @@
-type JobStatus = 'pending' | 'running' | 'complete' | 'failed'
+export type JobStatus = 'pending' | 'running' | 'complete' | 'failed'
 
 export type BaseJob = {
   id: string

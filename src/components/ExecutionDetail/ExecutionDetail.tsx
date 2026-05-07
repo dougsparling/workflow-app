@@ -11,38 +11,6 @@ interface Props {
   executionId: string
 }
 
-function messageIcon(msg: HumanMessage | AIMessage | ToolMessage): FeatherIconName {
-  if (HumanMessage.isInstance(msg)) return 'user'
-  if (AIMessage.isInstance(msg)) {
-    if (msg.tool_calls?.length) return 'zap'
-    return 'message-circle'
-  }
-  if (ToolMessage.isInstance(msg)) return 'check-square'
-  return 'circle'
-}
-
-function messageIconColor(msg: HumanMessage | AIMessage | ToolMessage, tokens: ThemeTokens): string {
-  if (HumanMessage.isInstance(msg)) return tokens.accentBase
-  if (AIMessage.isInstance(msg)) {
-    if (msg.tool_calls?.length) return tokens.amberBase
-    return tokens.accentBase
-  }
-  if (ToolMessage.isInstance(msg)) return tokens.statusComplete
-  return tokens.textMuted
-}
-
-function messageLabel(msg: HumanMessage | AIMessage | ToolMessage): string {
-  if (HumanMessage.isInstance(msg)) return 'Prompt'
-  if (AIMessage.isInstance(msg)) {
-    if (msg.tool_calls?.length) {
-      return msg.tool_calls.map((tc) => tc.name).join(', ')
-    }
-    return 'Response'
-  }
-  if (ToolMessage.isInstance(msg)) return msg.name ?? 'Tool'
-  return 'Step'
-}
-
 export default function ExecutionDetail({ executionId }: Props) {
   const job = useExecutionStore((s) => s.jobs.find((j) => j.id === executionId))
   const { tokens } = useTheme()
@@ -98,6 +66,38 @@ export default function ExecutionDetail({ executionId }: Props) {
       />
     </View>
   )
+}
+
+function messageIcon(msg: HumanMessage | AIMessage | ToolMessage): FeatherIconName {
+  if (HumanMessage.isInstance(msg)) return 'user'
+  if (AIMessage.isInstance(msg)) {
+    if (msg.tool_calls?.length) return 'zap'
+    return 'message-circle'
+  }
+  if (ToolMessage.isInstance(msg)) return 'check-square'
+  return 'circle'
+}
+
+function messageIconColor(msg: HumanMessage | AIMessage | ToolMessage, tokens: ThemeTokens): string {
+  if (HumanMessage.isInstance(msg)) return tokens.accentBase
+  if (AIMessage.isInstance(msg)) {
+    if (msg.tool_calls?.length) return tokens.amberBase
+    return tokens.accentBase
+  }
+  if (ToolMessage.isInstance(msg)) return tokens.statusComplete
+  return tokens.textMuted
+}
+
+function messageLabel(msg: HumanMessage | AIMessage | ToolMessage): string {
+  if (HumanMessage.isInstance(msg)) return 'Prompt'
+  if (AIMessage.isInstance(msg)) {
+    if (msg.tool_calls?.length) {
+      return msg.tool_calls.map((tc) => tc.name).join(', ')
+    }
+    return 'Response'
+  }
+  if (ToolMessage.isInstance(msg)) return msg.name ?? 'Tool'
+  return 'Step'
 }
 
 const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({

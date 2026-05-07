@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { TSchema } from 'typebox'
 import type { ExecutionStatus } from '@design/StatusBadge/StatusBadge'
 import type { Workflow, WorkflowEvent } from '@workflow/workflow'
+import { createSerialQueue, type BaseJob, type JobStatus, type SerialQueueSlice } from './serialQueue'
 
 export type WorkflowStepState = {
   name: string
@@ -9,83 +10,87 @@ export type WorkflowStepState = {
   error?: string
 }
 
-export type WorkflowJob = {
-  id: string
+export type WorkflowJob = BaseJob & {
   name: string
-  status: ExecutionStatus
   steps: WorkflowStepState[]
   error?: string
+  wf: Workflow<TSchema, TSchema>
+  input: unknown
 }
 
-type WorkflowQueueStore = {
-  jobs: WorkflowJob[]
-  run: (name: string, wf: Workflow<TSchema, TSchema>, input: unknown) => string
-  _nextId: () => string
-  _updateJob: (id: string, fn: (j: WorkflowJob) => WorkflowJob) => void
+type WorkflowQueueStore = SerialQueueSlice<WorkflowJob> & {
+  enqueue: (name: string, wf: Workflow<TSchema, TSchema>, input: unknown) => string
   _onEvent: (id: string, event: WorkflowEvent) => void
 }
 
-export const useWorkflowStore = create<WorkflowQueueStore>((set, get) => ({
-  jobs: [],
+export const useWorkflowStore = create<WorkflowQueueStore>((set, get) => {
+  const queue = createSerialQueue<WorkflowJob>(
+    set as (fn: (s: { jobs: WorkflowJob[] }) => { jobs: WorkflowJob[] }) => void,
+    get,
+    (job) => {
+      return new Promise<'complete' | 'failed'>((resolve) => {
+        job.wf.run(job.input, (event: WorkflowEvent) => get()._onEvent(job.id, event))
+          .then(() => resolve('complete'))
+          .catch(() => resolve('failed'))
+      })
+    },
+  )
 
-  _nextId: (() => {
-    let n = 1
-    return () => String(n++)
-  })(),
+  return {
+    ...queue,
 
-  _updateJob: (id, fn) =>
-    set(s => ({ jobs: s.jobs.map(j => (j.id === id ? fn(j) : j)) })),
+    enqueue: (name, wf, input) => {
+      const id = queue._nextId()
+      set(s => ({
+        jobs: [...s.jobs, {
+          id,
+          name,
+          status: 'pending' as JobStatus,
+          steps: wf.steps.map(step => ({ name: step.name, status: 'pending' as ExecutionStatus })),
+          abort: new AbortController(),
+          wf,
+          input,
+        }],
+      }))
+      get()._advance()
+      return id
+    },
 
-  run: (name, wf, input) => {
-    const id = get()._nextId()
-    set(s => ({
-      jobs: [...s.jobs, {
-        id,
-        name,
-        status: 'running' as ExecutionStatus,
-        steps: wf.steps.map(step => ({ name: step.name, status: 'pending' as ExecutionStatus })),
-      }],
-    }))
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(wf as any).run(input, (event: WorkflowEvent) => get()._onEvent(id, event))
-      .catch(() => {})
-    return id
-  },
-
-  _onEvent: (id, event) => {
-    switch (event.type) {
-      case 'step:start':
-        get()._updateJob(id, j => ({
-          ...j,
-          steps: j.steps.map((s, i) =>
-            i === event.stepIndex ? { ...s, status: 'running' as ExecutionStatus } : s
-          ),
-        }))
-        break
-      case 'step:complete':
-        get()._updateJob(id, j => ({
-          ...j,
-          steps: j.steps.map((s, i) =>
-            i === event.stepIndex ? { ...s, status: 'complete' as ExecutionStatus } : s
-          ),
-        }))
-        break
-      case 'step:error':
-        get()._updateJob(id, j => ({
-          ...j,
-          steps: j.steps.map((s, i) =>
-            i === event.stepIndex
-              ? { ...s, status: 'failed' as ExecutionStatus, error: event.error.message }
-              : s
-          ),
-        }))
-        break
-      case 'done':
-        get()._updateJob(id, j => ({ ...j, status: 'complete' as ExecutionStatus }))
-        break
-      case 'error':
-        get()._updateJob(id, j => ({ ...j, status: 'failed' as ExecutionStatus, error: event.error.message }))
-        break
-    }
-  },
-}))
+    _onEvent: (id, event) => {
+      switch (event.type) {
+        case 'step:start':
+          get()._updateJob(id, j => ({
+            ...j,
+            steps: j.steps.map((s, i) =>
+              i === event.stepIndex ? { ...s, status: 'running' as ExecutionStatus } : s
+            ),
+          }))
+          break
+        case 'step:complete':
+          get()._updateJob(id, j => ({
+            ...j,
+            steps: j.steps.map((s, i) =>
+              i === event.stepIndex ? { ...s, status: 'complete' as ExecutionStatus } : s
+            ),
+          }))
+          break
+        case 'step:error':
+          get()._updateJob(id, j => ({
+            ...j,
+            steps: j.steps.map((s, i) =>
+              i === event.stepIndex
+                ? { ...s, status: 'failed' as ExecutionStatus, error: event.error.message }
+                : s
+            ),
+          }))
+          break
+        case 'done':
+          get()._updateJob(id, j => ({ ...j, status: 'complete' as JobStatus }))
+          break
+        case 'error':
+          get()._updateJob(id, j => ({ ...j, status: 'failed' as JobStatus, error: event.error.message }))
+          break
+      }
+    },
+  }
+})

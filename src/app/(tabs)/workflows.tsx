@@ -28,12 +28,12 @@ function JobCard({ job, onPress }: { job: WorkflowJob, onPress: () => void }) {
 
 export default function Workflows() {
   const jobs = useWorkflowStore(s => s.jobs)
-  const run = useWorkflowStore(s => s.run)
+  const enqueue = useWorkflowStore(s => s.enqueue)
   const styles = useThemedStyles(themedStyles)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   // TODO: fix schema types
-  const runSample = () => run('Topic Summarizer', sampleWorkflow as unknown as Workflow<TSchema, TSchema>, { topic: 'quantum computing' })
+  const runSample = () => enqueue('Topic Summarizer', sampleWorkflow as unknown as Workflow<TSchema, TSchema>, { topic: 'quantum computing' })
 
   if (jobs.length === 0) {
     return (

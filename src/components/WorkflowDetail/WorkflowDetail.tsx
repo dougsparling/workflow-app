@@ -9,15 +9,6 @@ interface Props {
   workflowId: string
 }
 
-function stepIcon(status: ExecutionStatus): FeatherIconName {
-  switch (status) {
-    case 'complete': return 'check-square'
-    case 'running':  return 'zap'
-    case 'failed':   return 'alert-triangle'
-    default:         return 'circle'
-  }
-}
-
 export default function WorkflowDetail({ workflowId }: Props) {
   const job = useWorkflowStore(s => s.jobs.find(j => j.id === workflowId))
   const styles = useThemedStyles(themedStyles)
@@ -53,6 +44,15 @@ export default function WorkflowDetail({ workflowId }: Props) {
       />
     </View>
   )
+}
+
+function stepIcon(status: ExecutionStatus): FeatherIconName {
+  switch (status) {
+    case 'complete': return 'check-square'
+    case 'running':  return 'zap'
+    case 'failed':   return 'alert-triangle'
+    default:         return 'circle'
+  }
 }
 
 const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
