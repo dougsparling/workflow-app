@@ -9,6 +9,15 @@ import {
 import { Model } from './models'
 import { Tool } from './tools'
 
+// Hermes (React Native) doesn't have AbortSignal.prototype.throwIfAborted,
+// but LangChain's ChatOpenAI._generate relies on it. Polyfill once at module init.
+if (typeof AbortSignal !== 'undefined' && !('throwIfAborted' in AbortSignal.prototype)) {
+  ;(AbortSignal.prototype as unknown as { throwIfAborted: () => void }).throwIfAborted =
+    function throwIfAborted(this: AbortSignal) {
+      if (this.aborted) throw this.reason instanceof Error ? this.reason : new Error('Cancelled')
+    }
+}
+
 export type AgentDef = {
   name: string
   model: Model
@@ -40,11 +49,13 @@ export async function* runAgent(
   const readyModel = model.bindTools?.(agent.tools) ?? model
 
   while (true) {
-    signal?.throwIfAborted()
+    if (signal?.aborted) throw new Error('Cancelled')
 
     const response = await readyModel.invoke(messages, { signal })
-    // DeepSeek thinking mode returns reasoning_content which must be passed back
+
+    // TODO: DeepSeek thinking mode returns reasoning_content which must be passed back
     // to the API or stripped — LangChain doesn't serialize it, so strip it here.
+    // Should investigate if this degrades performance over multiple turns
     if (response.additional_kwargs?.reasoning_content) {
       delete response.additional_kwargs.reasoning_content
     }

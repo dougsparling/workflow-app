@@ -11,6 +11,7 @@ export type ExecutionStatus =
   | 'failed'
   | 'idle'
   | 'stopped'
+  | 'aborted'
 
 interface StatusColors {
   bg: string

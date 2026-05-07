@@ -1,9 +1,9 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages'
+import { type BaseMessage } from '@langchain/core/messages'
 import { tool } from '@langchain/core/tools'
 import { type TSchema } from 'typebox'
 import { Check, Errors } from 'typebox/value'
 import z from 'zod'
-import { type AgentDef, type OnNextCallback, runAgent } from './agent'
+import { type AgentDef, runAgent } from './agent'
 import { type Tool } from './tools'
 
 type AgentStepState = { ok: true; value: unknown } | { ok: false; error: Error }
@@ -14,8 +14,7 @@ type AgentStepState = { ok: true; value: unknown } | { ok: false; error: Error }
 export type AgentExecutor = (
   def: AgentDef,
   prompt: string,
-  callback: (event: OnNextCallback) => void,
-) => Promise<unknown>
+) => AsyncGenerator<BaseMessage>
 
 /**
  * Returns a step definition backed by an agent.
@@ -30,13 +29,16 @@ export function agentStep(agentDef: AgentDef, executor: AgentExecutor = runAgent
     const systemPrompt = extendPromptForWorkflow(agentDef.systemPrompt, inputSchema, outputSchema)
 
     let agentError: Error | undefined
-    await executor(
-      { ...agentDef, systemPrompt, tools: [...agentDef.tools, ...tools] },
-      'Begin.',
-      (event) => {
-        if (event.type === 'error') agentError = event.error
-      },
-    )
+    try {
+      for await (const _msg of executor(
+        { ...agentDef, systemPrompt, tools: [...agentDef.tools, ...tools] },
+        'Begin.',
+      )) {
+        // discard — agentStep only cares about the step state via complete_step / fail_step
+      }
+    } catch (e) {
+      agentError = e instanceof Error ? e : new Error(String(e))
+    }
 
     const state = getAgentStepState()
     if (state?.ok) return state.value

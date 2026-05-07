@@ -28,11 +28,7 @@ export const useWorkflowStore = create<WorkflowQueueStore>((set, get) => {
     set as (fn: (s: { jobs: WorkflowJob[] }) => { jobs: WorkflowJob[] }) => void,
     get,
     (job) => {
-      return new Promise<'complete' | 'failed'>((resolve) => {
-        job.wf.run(job.input, (event: WorkflowEvent) => get()._onEvent(job.id, event))
-          .then(() => resolve('complete'))
-          .catch(() => resolve('failed'))
-      })
+      return job.wf.run(job.input, (event: WorkflowEvent) => get()._onEvent(job.id, event)).then(() => {})
     },
   )
 

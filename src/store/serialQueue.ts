@@ -1,4 +1,4 @@
-export type JobStatus = 'pending' | 'running' | 'complete' | 'failed'
+export type JobStatus = 'pending' | 'running' | 'complete' | 'failed' | 'aborted'
 
 export type BaseJob = {
   id: string
@@ -12,14 +12,14 @@ export type SerialQueueSlice<J extends BaseJob> = {
   _nextId: () => string
   _updateJob: (id: string, fn: (j: J) => J) => void
   _advance: () => void
-  _onDone: (id: string, status: 'complete' | 'failed') => void
+  _onDone: (id: string, status: 'complete' | 'failed' | 'aborted') => void
   cancel: (id: string) => void
 }
 
 export function createSerialQueue<J extends BaseJob>(
   set: (fn: (s: { jobs: J[] }) => { jobs: J[] }) => void,
   get: () => SerialQueueSlice<J>,
-  runJob: (job: J) => Promise<'complete' | 'failed'>,
+  runJob: (job: J) => Promise<void>,
 ): SerialQueueSlice<J> {
   return {
     jobs: [],
@@ -27,25 +27,30 @@ export function createSerialQueue<J extends BaseJob>(
       let n = 1
       return () => String(n++)
     })(),
-    _updateJob: (id, fn) =>
-      set(s => ({ jobs: s.jobs.map(j => (j.id === id ? fn(j) : j)) })),
+    _updateJob: (id, fn) => set((s) => ({ jobs: s.jobs.map((j) => (j.id === id ? fn(j) : j)) })),
     _advance: () => {
-      const next = get().jobs.find(j => j.status === 'pending')
+      const next = get().jobs.find((j) => j.status === 'pending')
       if (!next) return
-      get()._updateJob(next.id, j => ({ ...j, status: 'running' as const, startedAt: Date.now() }))
+      get()._updateJob(next.id, (j) => ({ ...j, status: 'running', startedAt: Date.now() }))
       runJob(next)
-        .then(status => get()._onDone(next.id, status))
-        .catch(() => get()._onDone(next.id, 'failed'))
+        .then(() => get()._onDone(next.id, 'complete'))
+        .catch((err) => {
+          if (!next.abort.signal.aborted) {
+            console.error('agent execution failed', err)
+          }
+          get()._onDone(next.id, next.abort.signal.aborted ? 'aborted' : 'failed')
+        })
     },
     _onDone: (id, status) => {
-      get()._updateJob(id, j => ({ ...j, status }))
+      get()._updateJob(id, (j) => ({ ...j, status }))
       get()._advance()
     },
     cancel: (id) => {
-      const job = get().jobs.find(j => j.id === id)
+      const job = get().jobs.find((j) => j.id === id)
       if (!job) return
       job.abort.abort()
-      get()._updateJob(id, j => ({ ...j, status: 'failed' as const }))
+      // optimistically update status, will be set again when catching abort error
+      get()._updateJob(id, (j) => ({ ...j, status: 'aborted' }))
       get()._advance()
     },
   }
