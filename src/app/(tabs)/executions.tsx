@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FlatList, Pressable, View } from 'react-native'
+import { FlatList, View } from 'react-native'
 import { ToolMessage } from '@langchain/core/messages'
 import Background from '@design/Background/Background'
 import BottomSheet from '@design/BottomSheet/BottomSheet'
@@ -11,7 +11,7 @@ import type { ThemeTokens } from '@design/theme'
 import ExecutionDetail from '@components/ExecutionDetail/ExecutionDetail'
 import { type Job, useExecutionStore } from '@store/executionQueue'
 
-function JobCard({ job, index, onCancel }: { job: Job; index: number; onCancel: () => void }) {
+function JobCard({ job, index, onCancel, onPress }: { job: Job; index: number; onCancel: () => void; onPress?: () => void }) {
   const styles = useThemedStyles(themedStyles)
   const toolCalls = job.messages.filter((e) => ToolMessage.isInstance(e.msg)).length
   const duration = `${toolCalls} call${toolCalls !== 1 ? 's' : ''}`
@@ -22,6 +22,7 @@ function JobCard({ job, index, onCancel }: { job: Job; index: number; onCancel: 
         title={job.def.name}
         status={job.status}
         time={duration}
+        onPress={onPress}
       />
       {job.status === 'running' && (
         <View style={styles.cancelRow}>
@@ -52,9 +53,7 @@ export default function Executions() {
         data={[...jobs].reverse()}
         keyExtractor={(job) => job.id}
         renderItem={({ item, index }) => (
-          <Pressable onPress={() => setSelectedId(item.id)}>
-            <JobCard job={item} index={index} onCancel={() => cancel(item.id)} />
-          </Pressable>
+          <JobCard job={item} index={index} onCancel={() => cancel(item.id)} onPress={() => setSelectedId(item.id)} />
         )}
         contentContainerStyle={styles.list}
       />

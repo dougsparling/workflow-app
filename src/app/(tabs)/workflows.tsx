@@ -13,7 +13,7 @@ import { sampleWorkflow } from '@workflow/sampleWorkflow'
 import type { Workflow } from '@workflow/workflow'
 import type { TSchema } from 'typebox'
 
-function JobCard({ job }: { job: WorkflowJob }) {
+function JobCard({ job, onPress }: { job: WorkflowJob, onPress: () => void }) {
   const completedCount = job.steps.filter(s => s.status === 'complete').length
   return (
     <ActionRow
@@ -21,6 +21,7 @@ function JobCard({ job }: { job: WorkflowJob }) {
       status={job.status}
       time={`${completedCount}/${job.steps.length} steps`}
       subtitles={job.error ? [job.error] : undefined}
+      onPress={onPress}
     />
   )
 }
@@ -32,7 +33,7 @@ export default function Workflows() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   // TODO: fix schema types
-  const runSample = () => run('Content Pipeline', sampleWorkflow as unknown as Workflow<TSchema, TSchema>, { topic: 'quantum computing' })
+  const runSample = () => run('Topic Summarizer', sampleWorkflow as unknown as Workflow<TSchema, TSchema>, { topic: 'quantum computing' })
 
   if (jobs.length === 0) {
     return (
@@ -54,9 +55,7 @@ export default function Workflows() {
         data={[...jobs].reverse()}
         keyExtractor={j => j.id}
         renderItem={({ item }) => (
-          <Pressable onPress={() => setSelectedId(item.id)}>
-            <JobCard job={item} />
-          </Pressable>
+          <JobCard job={item} onPress={() => setSelectedId(item.id)} />
         )}
         contentContainerStyle={styles.list}
       />

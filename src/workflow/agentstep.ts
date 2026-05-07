@@ -8,15 +8,24 @@ import { type Tool } from './tools'
 
 type AgentStepState = { ok: true; value: unknown } | { ok: false; error: Error }
 
+/**
+ * Pluggable execution context for the agent run during the step.
+ */
 export type AgentExecutor = (
   def: AgentDef,
   prompt: string,
   callback: (event: OnNextCallback) => void,
 ) => Promise<unknown>
 
+/**
+ * Returns a step definition backed by an agent.
+ * 
+ * @param agentDef The agent's definition.
+ * @param executor Allows interception of agent runs. Can be used for agent observability + serialization, or if not set, just runs async immediately.
+ * @returns Step definition with erased result type (validation done at runtime)
+ */
 export function agentStep(agentDef: AgentDef, executor: AgentExecutor = runAgent) {
   return async (input: unknown, inputSchema: TSchema, outputSchema: TSchema): Promise<unknown> => {
-
     const { tools, getAgentStepState } = makeStepTools(input, outputSchema)
     const systemPrompt = extendPromptForWorkflow(agentDef.systemPrompt, inputSchema, outputSchema)
 
@@ -24,7 +33,9 @@ export function agentStep(agentDef: AgentDef, executor: AgentExecutor = runAgent
     await executor(
       { ...agentDef, systemPrompt, tools: [...agentDef.tools, ...tools] },
       'Begin.',
-      (event) => { if (event.type === 'error') agentError = event.error },
+      (event) => {
+        if (event.type === 'error') agentError = event.error
+      },
     )
 
     const state = getAgentStepState()
@@ -34,6 +45,14 @@ export function agentStep(agentDef: AgentDef, executor: AgentExecutor = runAgent
   }
 }
 
+/**
+ * Creates tools that allow the agent to manage the step's state.
+ *
+ * @param input Input to the step, which can optionally be read by the agent
+ * @param outputSchema The expected output schema. Will be validated on step
+ *                     completion to give agent a chance to course-correct
+ * @returns A handle to the step state (modified here, exposed via closure)
+ */
 function makeStepTools(input: unknown, outputSchema: TSchema) {
   let state: AgentStepState | undefined
 
@@ -85,6 +104,16 @@ function makeStepTools(input: unknown, outputSchema: TSchema) {
   return { tools: [readInput, completeStep, failStep] as Tool[], getAgentStepState: () => state }
 }
 
+/**
+ * Enhances the agent's system prompt to work without the constraints of a workflow.
+ *
+ * Note the input and output schema definitions embed validation information, not just shape.
+ *
+ * @param original The agent's base prompt.
+ * @param inputSchema Schema of the step's input
+ * @param outputSchema Schema of the step's output
+ * @returns A single combined workflow + agent system prompt.
+ */
 function extendPromptForWorkflow(
   original: string,
   inputSchema: TSchema,

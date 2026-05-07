@@ -5,12 +5,12 @@ import { agentStep, type AgentExecutor } from './agentstep'
 import { deepseek } from './models'
 
 const SummarySchema = Type.Object({
-  topic: Type.String(),
-  summary: Type.String(),
+  topic: Type.String({ minLength: 10 }),
+  summary: Type.String({ minLength: 50, maxLength: 5000 }),
 })
 
 const BulletsSchema = Type.Object({
-  bullets: Type.Array(Type.String()),
+  bullets: Type.Array(Type.String({ minLength: 10, maxLength: 200 }), { minItems: 3, maxItems: 3 }),
 })
 
 const queueExecutor: AgentExecutor = (def, prompt, cb) =>

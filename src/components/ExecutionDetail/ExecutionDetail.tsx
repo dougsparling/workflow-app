@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { ActivityIndicator, FlatList, Text, View } from 'react-native'
-import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages'
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages'
 import StatusBadge from '@design/StatusBadge/StatusBadge'
 import ActionRow, { type FeatherIconName } from '@design/ActionRow/ActionRow'
 import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
@@ -58,8 +58,7 @@ export default function ExecutionDetail({ executionId }: Props) {
   if (!job) return null
 
   const filtered = job.messages.filter(
-    (e): e is { msg: HumanMessage | AIMessage | ToolMessage; ts: number } =>
-      !SystemMessage.isInstance(e.msg),
+    (e): e is { msg: BaseMessage; ts: number } => !SystemMessage.isInstance(e.msg),
   )
   const isRunning = job.status === 'running'
 
