@@ -1,5 +1,5 @@
 import { describe, it, expect } from "@jest/globals"
-import { Type } from "@sinclair/typebox"
+import { Type } from "typebox"
 import { workflow, type Workflow, type WorkflowBuilder } from "@workflow/workflow"
 
 describe("workflow", () => {

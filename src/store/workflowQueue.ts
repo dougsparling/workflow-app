@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { TSchema } from '@sinclair/typebox'
+import type { TSchema } from 'typebox'
 import type { ExecutionStatus } from '@design/StatusBadge/StatusBadge'
 import type { Workflow, WorkflowEvent } from '@workflow/workflow'
 

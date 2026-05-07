@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox'
+import { Type } from 'typebox'
 import { useExecutionStore } from '@store/executionQueue'
 import { workflow } from './workflow'
 import { agentStep, type AgentExecutor } from './agentstep'

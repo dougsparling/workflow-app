@@ -1,5 +1,5 @@
-import { type TSchema, type Static } from '@sinclair/typebox'
-import { Value } from '@sinclair/typebox/value'
+import { type TSchema, type Static } from 'typebox'
+import { Check, Errors } from 'typebox/value'
 
 export type WorkflowEvent =
   | { type: 'step:start';    stepIndex: number; stepName: string }
@@ -32,9 +32,9 @@ export type WorkflowBuilder<In extends TSchema, Out extends TSchema> = {
 }
 
 function validate(schema: TSchema, value: unknown, stepName: string, direction: 'input' | 'output'): void {
-  if (!Value.Check(schema, value)) {
-    const errors = [...Value.Errors(schema, value)]
-    const message = errors.map(e => `${e.path || '(root)'}: ${e.message}`).join('; ')
+  if (!Check(schema, value)) {
+    const errors = [...Errors(schema, value)]
+    const message = errors.map(e => `${e.instancePath || '(root)'}: ${e.message}`).join('; ')
     throw new Error(`Step "${stepName}" ${direction} validation failed: ${message}`)
   }
 }

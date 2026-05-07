@@ -11,7 +11,7 @@ import WorkflowDetail from '@components/WorkflowDetail/WorkflowDetail'
 import { useWorkflowStore, type WorkflowJob } from '@store/workflowQueue'
 import { sampleWorkflow } from '@workflow/sampleWorkflow'
 import type { Workflow } from '@workflow/workflow'
-import type { TSchema } from '@sinclair/typebox'
+import type { TSchema } from 'typebox'
 
 function JobCard({ job }: { job: WorkflowJob }) {
   const completedCount = job.steps.filter(s => s.status === 'complete').length

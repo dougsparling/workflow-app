@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { tool } from '@langchain/core/tools'
-import { type TSchema } from '@sinclair/typebox'
-import { Value } from '@sinclair/typebox/value'
+import { type TSchema } from 'typebox'
+import { Check, Errors } from 'typebox/value'
 import z from 'zod'
 import { type AgentDef, type OnNextCallback, runAgent } from './agent'
 import { type Tool } from './tools'
@@ -56,9 +56,9 @@ function makeStepTools(input: unknown, outputSchema: TSchema) {
 
   const completeStep = tool(
     ({ output }) => {
-      if (!Value.Check(outputSchema, output)) {
-        const errors = [...Value.Errors(outputSchema, output)]
-        return `Output validation failed: ${errors.map((e) => `${e.path || '(root)'}: ${e.message}`).join('; ')}`
+      if (!Check(outputSchema, output)) {
+        const errors = [...Errors(outputSchema, output)]
+        return `Output validation failed: ${errors.map((e) => `${e.instancePath || '(root)'}: ${e.message}`).join('; ')}`
       }
       state = { ok: true, value: output }
       return 'Step completed.'
