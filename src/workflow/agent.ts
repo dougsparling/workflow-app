@@ -11,7 +11,7 @@ import { Tool } from './tools'
 
 type MessageThread = BaseMessage[]
 
-type OnNextCallback =
+export type OnNextCallback =
   | { readonly type: 'message'; msg: BaseMessage; last: boolean }
   | { readonly type: 'error'; error: Error }
 

@@ -1,6 +1,15 @@
 import { type TSchema, type Static } from '@sinclair/typebox'
 import { Value } from '@sinclair/typebox/value'
 
+export type WorkflowEvent =
+  | { type: 'step:start';    stepIndex: number; stepName: string }
+  | { type: 'step:complete'; stepIndex: number; stepName: string }
+  | { type: 'step:error';    stepIndex: number; stepName: string; error: Error }
+  | { type: 'done' }
+  | { type: 'error';         error: Error }
+
+export type WorkflowCallback = (event: WorkflowEvent) => void
+
 export type Step<In extends TSchema, Out extends TSchema> = {
   name: string
   input: In
@@ -10,7 +19,7 @@ export type Step<In extends TSchema, Out extends TSchema> = {
 
 export type Workflow<In extends TSchema, Out extends TSchema> = {
   steps: Step<TSchema, TSchema>[]
-  run: (input: Static<In>) => Promise<Static<Out>>
+  run: (input: Static<In>, callback?: WorkflowCallback) => Promise<Static<Out>>
 }
 
 export type WorkflowBuilder<In extends TSchema, Out extends TSchema> = {
@@ -30,13 +39,23 @@ function validate(schema: TSchema, value: unknown, stepName: string, direction: 
   }
 }
 
-async function runSteps(steps: Step<TSchema, TSchema>[], input: unknown): Promise<unknown> {
+async function runSteps(steps: Step<TSchema, TSchema>[], input: unknown, callback: WorkflowCallback): Promise<unknown> {
   let result: unknown = input
-  for (const step of steps) {
+  for (const [i, step] of steps.entries()) {
+    callback({ type: 'step:start', stepIndex: i, stepName: step.name })
     validate(step.input, result, step.name, 'input')
-    result = await step.execute(result as Static<TSchema>, step.input, step.output)
-    validate(step.output, result, step.name, 'output')
+    try {
+      result = await step.execute(result as Static<TSchema>, step.input, step.output)
+      validate(step.output, result, step.name, 'output')
+      callback({ type: 'step:complete', stepIndex: i, stepName: step.name })
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error(String(e))
+      callback({ type: 'step:error', stepIndex: i, stepName: step.name, error })
+      callback({ type: 'error', error })
+      throw e
+    }
   }
+  callback({ type: 'done' })
   return result
 }
 
@@ -61,7 +80,7 @@ function makeBuilder<In extends TSchema, Out extends TSchema>(
     create(): Workflow<In, Out> {
       return {
         steps,
-        run: (input: Static<In>) => runSteps(steps, input) as Promise<Static<Out>>,
+        run: (input: Static<In>, callback: WorkflowCallback = () => {}) => runSteps(steps, input, callback) as Promise<Static<Out>>,
       }
     },
   }

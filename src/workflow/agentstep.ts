@@ -3,19 +3,25 @@ import { tool } from '@langchain/core/tools'
 import { type TSchema } from '@sinclair/typebox'
 import { Value } from '@sinclair/typebox/value'
 import z from 'zod'
-import { type AgentDef, runAgent } from './agent'
+import { type AgentDef, type OnNextCallback, runAgent } from './agent'
 import { type Tool } from './tools'
 
 type AgentStepState = { ok: true; value: unknown } | { ok: false; error: Error }
 
-export function agentStep(agentDef: AgentDef) {
+export type AgentExecutor = (
+  def: AgentDef,
+  prompt: string,
+  callback: (event: OnNextCallback) => void,
+) => Promise<unknown>
+
+export function agentStep(agentDef: AgentDef, executor: AgentExecutor = runAgent) {
   return async (input: unknown, inputSchema: TSchema, outputSchema: TSchema): Promise<unknown> => {
 
     const { tools, getAgentStepState } = makeStepTools(input, outputSchema)
     const systemPrompt = extendPromptForWorkflow(agentDef.systemPrompt, inputSchema, outputSchema)
 
     let agentError: Error | undefined
-    await runAgent(
+    await executor(
       { ...agentDef, systemPrompt, tools: [...agentDef.tools, ...tools] },
       'Begin.',
       (event) => { if (event.type === 'error') agentError = event.error },
