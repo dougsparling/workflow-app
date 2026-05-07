@@ -9,12 +9,6 @@ import {
 import { Model } from './models'
 import { Tool } from './tools'
 
-type MessageThread = BaseMessage[]
-
-export type OnNextCallback =
-  | { readonly type: 'message'; msg: BaseMessage; last: boolean }
-  | { readonly type: 'error'; error: Error }
-
 export type AgentDef = {
   name: string
   model: Model
@@ -22,45 +16,55 @@ export type AgentDef = {
   systemPrompt: string
 }
 
-export const runAgent = async (
+export async function* runAgent(
   agent: AgentDef,
   prompt: string,
-  callback: (_: OnNextCallback) => void,
-) => {
-  const messages: MessageThread = [new SystemMessage(agent.systemPrompt), new HumanMessage(prompt)]
-  messages.forEach((msg) => callback({ type: 'message', msg, last: false }))
+  signal?: AbortSignal,
+): AsyncGenerator<BaseMessage> {
+  const messages: BaseMessage[] = [
+    new SystemMessage(agent.systemPrompt),
+    new HumanMessage(prompt),
+  ]
+  yield messages[0]
+  yield messages[1]
 
   const model = await agent.model.factory()
   const toolsByName = Object.fromEntries(agent.tools.map((t) => [t.name, t]))
 
   if (!model.bindTools && agent.tools.length > 0) {
-    throw new Error(`${agent.tools.length} tools given but not supported by ${agent.model.label}`)
+    throw new Error(
+      `${agent.tools.length} tools given but not supported by ${agent.model.label}`,
+    )
   }
 
   const readyModel = model.bindTools?.(agent.tools) ?? model
 
-  try {
-    while (true) {
-      const response = await readyModel.invoke(messages)
-      messages.push(response)
-      if (AIMessage.isInstance(response) && response.tool_calls?.length) {
-        // only tool calls require harness intervention for now
-        for (const call of response.tool_calls) {
-          const handler = toolsByName[call.name]
-          const toolMsg = handler
-            ? ((await handler.invoke(call)) as ToolMessage)
-            : new ToolMessage({ content: `Unknown tool: ${call.name}`, tool_call_id: call.id ?? '' })
-          messages.push(toolMsg)
-          callback({ type: 'message', msg: toolMsg, last: false })
-        }
-      } else {
-        callback({ type: 'message', msg: response, last: true })
-        break
-      }
-    }
-  } catch (e) {
-    callback({ type: 'error', error: e instanceof Error ? e : new Error(String(e)) })
-  }
+  while (true) {
+    signal?.throwIfAborted()
 
-  return messages
+    const response = await readyModel.invoke(messages, { signal })
+    // DeepSeek thinking mode returns reasoning_content which must be passed back
+    // to the API or stripped — LangChain doesn't serialize it, so strip it here.
+    if (response.additional_kwargs?.reasoning_content) {
+      delete response.additional_kwargs.reasoning_content
+    }
+    messages.push(response)
+
+    if (AIMessage.isInstance(response) && response.tool_calls?.length) {
+      for (const call of response.tool_calls) {
+        const handler = toolsByName[call.name]
+        const toolMsg = handler
+          ? ((await handler.invoke(call)) as ToolMessage)
+          : new ToolMessage({
+              content: `Unknown tool: ${call.name}`,
+              tool_call_id: call.id ?? '',
+            })
+        messages.push(toolMsg)
+        yield toolMsg
+      }
+    } else {
+      yield response
+      return
+    }
+  }
 }
