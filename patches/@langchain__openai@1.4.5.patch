@@ -1,0 +1,24 @@
+diff --git a/dist/converters/completions.cjs b/dist/converters/completions.cjs
+index 791756ca4ec9fed98ecb44b90e090ad8d00db40a..33a3d13d294ee847a7abf64af4f3c2a740026341 100644
+--- a/dist/converters/completions.cjs
++++ b/dist/converters/completions.cjs
+@@ -590,6 +590,7 @@ const convertMessagesToCompletionsMessageParams = ({ messages, model }) => {
+ 			role: "assistant",
+ 			audio: { id: message.additional_kwargs.audio.id }
+ 		}];
++		if (message.additional_kwargs.reasoning_content != null) completionParam.reasoning_content = message.additional_kwargs.reasoning_content;
+ 		return completionParam;
+ 	});
+ };
+diff --git a/dist/converters/completions.js b/dist/converters/completions.js
+index 434066251ce2b1a0a8fb48198576d4ba65e7738f..70a05e60f371407862a3094ddf8f7e3e529e40ed 100644
+--- a/dist/converters/completions.js
++++ b/dist/converters/completions.js
+@@ -590,6 +590,7 @@ const convertMessagesToCompletionsMessageParams = ({ messages, model }) => {
+ 			role: "assistant",
+ 			audio: { id: message.additional_kwargs.audio.id }
+ 		}];
++		if (message.additional_kwargs.reasoning_content != null) completionParam.reasoning_content = message.additional_kwargs.reasoning_content;
+ 		return completionParam;
+ 	});
+ };

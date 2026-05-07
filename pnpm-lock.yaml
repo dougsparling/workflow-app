@@ -8,6 +8,12 @@ patchedDependencies:
   '@langchain/core@1.1.41':
     hash: 6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97
     path: patches/@langchain__core@1.1.41.patch
+  '@langchain/openai@1.4.4':
+    hash: 3ab8b35e010e1e6ecb279246a40e98c408329589b5b7abe09890785031ce700f
+    path: patches/@langchain__openai@1.4.4.patch
+  '@langchain/openai@1.4.5':
+    hash: 3ab8b35e010e1e6ecb279246a40e98c408329589b5b7abe09890785031ce700f
+    path: patches/@langchain__openai@1.4.5.patch
 
 importers:
 
@@ -24,7 +30,7 @@ importers:
         version: 1.0.25(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)
       '@langchain/openai':
         specifier: ^1.4.4
-        version: 1.4.4(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)
+        version: 1.4.4(patch_hash=3ab8b35e010e1e6ecb279246a40e98c408329589b5b7abe09890785031ce700f)(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)
       '@react-native-async-storage/async-storage':
         specifier: ^3.0.2
         version: 3.0.2(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -6482,7 +6488,7 @@ snapshots:
   '@langchain/deepseek@1.0.25(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)':
     dependencies:
       '@langchain/core': 1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
-      '@langchain/openai': 1.4.5(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)
+      '@langchain/openai': 1.4.5(patch_hash=3ab8b35e010e1e6ecb279246a40e98c408329589b5b7abe09890785031ce700f)(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)
     transitivePeerDependencies:
       - ws
 
@@ -6516,7 +6522,7 @@ snapshots:
       - svelte
       - vue
 
-  '@langchain/openai@1.4.4(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)':
+  '@langchain/openai@1.4.4(patch_hash=3ab8b35e010e1e6ecb279246a40e98c408329589b5b7abe09890785031ce700f)(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)':
     dependencies:
       '@langchain/core': 1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
       js-tiktoken: 1.0.21
@@ -6525,7 +6531,7 @@ snapshots:
     transitivePeerDependencies:
       - ws
 
-  '@langchain/openai@1.4.5(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)':
+  '@langchain/openai@1.4.5(patch_hash=3ab8b35e010e1e6ecb279246a40e98c408329589b5b7abe09890785031ce700f)(@langchain/core@1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0))(ws@8.20.0)':
     dependencies:
       '@langchain/core': 1.1.41(patch_hash=6bb616d78786e9266050838c34c57f8e0018d778f7e79103b696435bd6928d97)(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
       js-tiktoken: 1.0.21
@@ -7992,7 +7998,7 @@ snapshots:
       '@typescript-eslint/eslint-plugin': 8.59.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@typescript-eslint/parser': 8.59.0(eslint@9.39.4)(typescript@5.9.3)
       eslint: 9.39.4
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.16.2(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint@9.39.4))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4))(eslint@9.39.4)
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.16.2(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint@9.39.4))(eslint-plugin-import@2.32.0)(eslint@9.39.4)
       eslint-plugin-expo: 1.0.0(eslint@9.39.4)(typescript@5.9.3)
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4)
       eslint-plugin-react: 7.37.5(eslint@9.39.4)
@@ -8023,7 +8029,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.16.2(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint@9.39.4))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4))(eslint@9.39.4):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.16.2(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint@9.39.4))(eslint-plugin-import@2.32.0)(eslint@9.39.4):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -8046,7 +8052,7 @@ snapshots:
       '@typescript-eslint/parser': 8.59.0(eslint@9.39.4)(typescript@5.9.3)
       eslint: 9.39.4
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.16.2(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint@9.39.4))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4))(eslint@9.39.4)
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.16.2(@typescript-eslint/utils@8.59.0(eslint@9.39.4)(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint@9.39.4))(eslint-plugin-import@2.32.0)(eslint@9.39.4)
     transitivePeerDependencies:
       - supports-color
 

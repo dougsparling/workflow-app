@@ -53,12 +53,10 @@ export async function* runAgent(
 
     const response = await readyModel.invoke(messages, { signal })
 
-    // TODO: DeepSeek thinking mode returns reasoning_content which must be passed back
-    // to the API or stripped — LangChain doesn't serialize it, so strip it here.
-    // Should investigate if this degrades performance over multiple turns
-    if (response.additional_kwargs?.reasoning_content) {
-      delete response.additional_kwargs.reasoning_content
-    }
+    // DeepSeek thinking mode returns reasoning_content which must be passed back
+    // to the API on subsequent calls. We preserve it in additional_kwargs so the
+    // LangChain OpenAI completions converter can include it when serializing
+    // messages back to the API (see the @langchain/openai patch).
     messages.push(response)
 
     if (AIMessage.isInstance(response) && response.tool_calls?.length) {

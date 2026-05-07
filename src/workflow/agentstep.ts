@@ -23,8 +23,8 @@ export type AgentExecutor = (
  * @param executor Allows interception of agent runs. Can be used for agent observability + serialization, or if not set, just runs async immediately.
  * @returns Step definition with erased result type (validation done at runtime)
  */
-export function agentStep(agentDef: AgentDef, executor: AgentExecutor = runAgent) {
-  return async (input: unknown, inputSchema: TSchema, outputSchema: TSchema): Promise<unknown> => {
+export function agentStep<T = unknown>(agentDef: AgentDef, executor: AgentExecutor = runAgent) {
+  return async (input: unknown, inputSchema: TSchema, outputSchema: TSchema): Promise<T> => {
     const { tools, getAgentStepState } = makeStepTools(input, outputSchema)
     const systemPrompt = extendPromptForWorkflow(agentDef.systemPrompt, inputSchema, outputSchema)
 
@@ -41,7 +41,7 @@ export function agentStep(agentDef: AgentDef, executor: AgentExecutor = runAgent
     }
 
     const state = getAgentStepState()
-    if (state?.ok) return state.value
+    if (state?.ok) return state.value as T
     if (state && !state.ok) throw state.error
     throw agentError ?? new Error('Agent finished without calling complete_step or fail_step')
   }
