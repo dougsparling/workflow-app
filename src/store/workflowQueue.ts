@@ -19,39 +19,26 @@ export type WorkflowJob = BaseJob & {
 }
 
 type WorkflowQueueStore = SerialQueueSlice<WorkflowJob> & {
-  enqueue: (name: string, wf: Workflow<TSchema, TSchema>, input: unknown) => string
+  enqueueWorkflow: (name: string, wf: Workflow<TSchema, TSchema>, input: unknown) => string
   _onEvent: (id: string, event: WorkflowEvent) => void
 }
 
 export const useWorkflowStore = create<WorkflowQueueStore>((set, get) => {
   const queue = createSerialQueue<WorkflowJob>(
+    (job) => job.wf.run(job.input, (event: WorkflowEvent) => get()._onEvent(job.id, event)).then(() => {}),
+  )(
     set as (fn: (s: { jobs: WorkflowJob[] }) => { jobs: WorkflowJob[] }) => void,
-    get,
-    (job) => {
-      return job.wf.run(job.input, (event: WorkflowEvent) => get()._onEvent(job.id, event)).then(() => {})
-    },
+    get as () => SerialQueueSlice<WorkflowJob>,
   )
 
   return {
     ...queue,
-
-    enqueue: (name, wf, input) => {
-      const id = queue._nextId()
-      set(s => ({
-        jobs: [...s.jobs, {
-          id,
-          name,
-          status: 'pending' as JobStatus,
-          steps: wf.steps.map(step => ({ name: step.name, status: 'pending' as ExecutionStatus })),
-          abort: new AbortController(),
-          wf,
-          input,
-        }],
-      }))
-      get()._advance()
-      return id
-    },
-
+    enqueueWorkflow: (name, wf, input) => queue.enqueue({
+      name,
+      wf,
+      input,
+      steps: wf.steps.map(step => ({ name: step.name, status: 'pending' as ExecutionStatus })),
+    }),
     _onEvent: (id, event) => {
       switch (event.type) {
         case 'step:start':

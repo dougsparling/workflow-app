@@ -1,6 +1,10 @@
 # Project Context
 
-This is a **React Native (Expo) mobile app** called "workflow-app" that demonstrates **LangChain.js agentic workflows** running on a mobile device. It's a proof-of-concept combining:
+This is a **React Native (Expo) mobile app** called "workflow-app" that demonstrates **LangChain.js agentic workflows** running on a mobile device.
+
+## General Agent Guidance
+
+- Do not delete comments when making adjacent refactoring unless the comment's validity is impacted by the change, in which case it should be rewritten, not removed.
 
 ## Tech Stack
 
@@ -24,16 +28,24 @@ This is a **React Native (Expo) mobile app** called "workflow-app" that demonstr
 
 There's a small patch to `@langchain/core` (at `patches/@langchain__core@1.1.41.patch`) to fix a `navigator.userAgent` optional chaining issue for React Native compatibility. The patch is applied via pnpm's `patchedDependencies` in `pnpm-workspace.yaml`.
 
+There is another patch to `@langchain/openai` to provide pass-through support for DeepSeek-specific reasoning_content. This is to prevent 400 errors when calling DeepSeek API in multi-turn scenarios.
+
 ## Directory Conventions
 
 - `src/app/` — Expo Router file-based navigation root. Contains `_layout.tsx` (root layout wrapping AssetLoader, ThemeProvider, and Stack navigator), `index.tsx` (redirect to executions tab), and `(tabs)/` (bottom tab navigator with executions, workflows, agents, and settings screens).
 - `src/contexts/` — React contexts, providers, and loaders (e.g. `AssetLoader`). Each file exports a provider or hook.
 - `src/components/` — Reusable UI components. Each component lives in its own directory, no barrel files. Pattern: `components/{name}/{name}.tsx`.
 - `src/design/` — Design system: theme provider, design tokens, and reusable themed UI components.
-- `src/domain/` — (Reserved) Reusable types and domain objects shared across the app.
-- `src/hooks/` — (Reserved) Reusable React hooks (data fetching, state, etc.). Import via `@hooks/*`.
+- `src/domain/` — Reusable types and domain objects shared across the app.
+- `src/hooks/` — Reusable React hooks (data fetching, state, etc.). Import via `@hooks/*`.
 - `src/store/` — Zustand state stores (e.g. `executionQueue.ts` for agent execution lifecycle).
 - `src/workflow/` — Library module containing the workflow engine, agent loop, tool definitions, model configurations, and tests.
+
+## Code Organization
+
+- **Test files** — Tests (`it`/`test` blocks) should appear first, followed by helper functions at the bottom of the file.
+- **Component files** — The default export component should be the first export in the file.
+- **Type discipline** — Avoid `any` and `unknown` as much as possible. Prefer precise types, generics, or branded types over escape hatches.
 
 ## Design System (`src/design/`)
 

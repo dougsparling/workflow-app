@@ -116,7 +116,7 @@ function RunPromptModal({ item, visible, onRun, onCancel }: RunPromptModalProps)
 export default function Agents() {
   const [selected, setSelected] = useState(null as AgentItem | null)
   const styles = useThemedStyles(themedStyles)
-  const enqueue = useExecutionStore((s) => s.enqueue)
+  const enqueue = useExecutionStore((s) => s.enqueueAgent)
 
   const handleRun = useCallback(
     (prompt: string) => {

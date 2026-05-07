@@ -19,7 +19,7 @@ export type Job = BaseJob & {
 }
 
 type ExecutionQueueStore = SerialQueueSlice<Job> & {
-  enqueue: (def: AgentDef, prompt: string) => string
+  enqueueAgent: (def: AgentDef, prompt: string) => string
   _onMessage: (id: string, msg: BaseMessage) => void
 }
 
@@ -35,30 +35,14 @@ export const useExecutionStore = create<ExecutionQueueStore>((set, get) => {
     }
   }
 
-  const queue = createSerialQueue<Job>(
-    set as Parameters<typeof createSerialQueue<Job>>[0],
+  const queue = createSerialQueue<Job>(runJob)(
+    set as (fn: (s: { jobs: Job[] }) => { jobs: Job[] }) => void,
     get as () => SerialQueueSlice<Job>,
-    runJob,
   )
 
   return {
     ...queue,
-
-    enqueue: (def, prompt) => {
-      const id = get()._nextId()
-      const job: Job = {
-        id,
-        prompt,
-        def,
-        messages: [],
-        status: 'pending',
-        abort: new AbortController(),
-      }
-      set(s => ({ jobs: [...s.jobs, job] }))
-      if (!get().jobs.some(j => j.status === 'running')) get()._advance()
-      return id
-    },
-
+    enqueueAgent: (def, prompt) => queue.enqueue({ def, prompt, messages: [] }),
     _onMessage: (id, msg) =>
       get()._updateJob(id, j => ({ ...j, messages: [...j.messages, { msg, ts: Date.now() }] })),
   }
@@ -66,7 +50,7 @@ export const useExecutionStore = create<ExecutionQueueStore>((set, get) => {
 
 export function enqueueAsync(def: AgentDef, prompt: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const id = useExecutionStore.getState().enqueue(def, prompt)
+    const id = useExecutionStore.getState().enqueueAgent(def, prompt)
     const unsub = useExecutionStore.subscribe((state) => {
       const job = state.jobs.find(j => j.id === id)
       if (!job) return

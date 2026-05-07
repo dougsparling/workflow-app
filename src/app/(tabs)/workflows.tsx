@@ -28,7 +28,7 @@ function JobCard({ job, onPress }: { job: WorkflowJob, onPress: () => void }) {
 
 export default function Workflows() {
   const jobs = useWorkflowStore(s => s.jobs)
-  const enqueue = useWorkflowStore(s => s.enqueue)
+  const enqueue = useWorkflowStore(s => s.enqueueWorkflow)
   const styles = useThemedStyles(themedStyles)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
