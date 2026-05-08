@@ -2,16 +2,13 @@ import { Type } from 'typebox'
 import { enqueueAsync } from '@store/executionQueue'
 import { workflow } from './workflow'
 import { agentStep, type AgentExecutor, type AgentMeta } from './agentstep'
+import { outboxStep, OutboxOutputSchema } from './outboxStep'
 import { deepseek, qwen } from './models'
 import { wikipedia } from './tools'
 
 const SummarySchema = Type.Object({
   topic: Type.String({ minLength: 10 }),
   summary: Type.String({ minLength: 50, maxLength: 5000 }),
-})
-
-const BulletsSchema = Type.Object({
-  bullets: Type.Array(Type.String({ minLength: 10, maxLength: 200 }), { minItems: 3, maxItems: 3 }),
 })
 
 const queueExecutor: AgentExecutor = async function* (def, prompt): AsyncGenerator<AgentMeta> {
@@ -30,12 +27,12 @@ export const sampleWorkflow = workflow(Type.Object({ topic: Type.String() }))
     },
     queueExecutor,
   ), { model: deepseek.label })
-  .step('bullet-points', BulletsSchema, agentStep(
+  .step('outbox', OutboxOutputSchema, outboxStep(
     {
-      name: 'Bullet Formatter',
+      name: 'Outbox Writer',
       model: qwen,
       tools: [],
-      systemPrompt: 'Convert the provided summary into exactly 3 concise bullet points.',
+      systemPrompt: 'Given the input, produce a well-formatted markdown document with a descriptive title. The output must contain "title" (a short plain-text title for the document) and "markdown" (the full content as markdown, including the title as a level-1 heading).',
     },
     queueExecutor,
   ), { model: qwen.label })

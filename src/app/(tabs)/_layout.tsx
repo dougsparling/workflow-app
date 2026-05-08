@@ -40,6 +40,15 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
+        name="outbox"
+        options={{
+          title: 'outbox',
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="mail" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="executions"
         options={{
           title: 'executions',
