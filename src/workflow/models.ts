@@ -29,12 +29,17 @@ const makeQwen = async () => new ChatOpenAI({
   modelKwargs: { enable_thinking: true },
 })
 
-export const deepseekApiKey = {
+export type ApiKeyStorage = {
+  get: () => Promise<string | null>
+  set: (key: string) => Promise<void>
+}
+
+export const deepseekApiKey: ApiKeyStorage = {
   set: async (key: string) => AsyncStorage.setItem(DEEPSEEK_KEY_STORAGE, key),
   get: async () => await AsyncStorage.getItem(DEEPSEEK_KEY_STORAGE)
 }
 
-export const anthropicApiKey = {
+export const anthropicApiKey: ApiKeyStorage = {
   set: async (key: string) => AsyncStorage.setItem(ANTHROPIC_KEY_STORAGE, key),
   get: async () => await AsyncStorage.getItem(ANTHROPIC_KEY_STORAGE)
 }

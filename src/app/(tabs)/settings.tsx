@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native'
 import { useEffect, useState } from 'react'
-import { deepseekApiKey, anthropicApiKey } from '@workflow/models'
+import { deepseekApiKey, anthropicApiKey, type ApiKeyStorage } from '@workflow/models'
 import { createThemedStyles, useTheme, useThemedStyles } from '@design/theme'
 import type { ThemePreference } from '@design/theme'
 import TextInput from '@design/TextInput/TextInput'
@@ -9,35 +9,13 @@ import SectionLabel from '@design/SectionLabel/SectionLabel'
 import MultiToggle from '@design/MultiToggle/MultiToggle'
 
 const DEEPSEEK_KEY_REGEX = /^sk-[a-f0-9]{32}$/
-const ANTHROPIC_KEY_REGEX = /^sk-ant-/
+const ANTHROPIC_KEY_REGEX = /^sk-ant-.{32}/
 
 const THEME_OPTIONS: { label: string; value: ThemePreference }[] = [
   { label: 'Light', value: 'light' },
   { label: 'Dark', value: 'dark' },
   { label: 'System', value: 'system' },
 ]
-
-function useApiKeyField(
-  storageKey: { get: () => Promise<string | null>; set: (k: string) => Promise<void> },
-  regex: RegExp,
-) {
-  const [value, setValue] = useState(null as string | null)
-  const trimmed = value?.trim() ?? ''
-  const validity: 'empty' | 'invalid' | 'valid' =
-    !trimmed ? 'empty' : regex.test(trimmed) ? 'valid' : 'invalid'
-
-  useEffect(() => { storageKey.get().then(setValue) }, [])
-  useEffect(() => {
-    if (validity === 'valid') storageKey.set(trimmed)
-  }, [validity, trimmed])
-
-  const statusLabel =
-    validity === 'empty' ? null :
-    validity === 'invalid' ? 'INVALID' :
-    'SAVED'
-
-  return { value, setValue, validity, statusLabel }
-}
 
 export default function Settings() {
   const styles = useThemedStyles(themedStyles)
@@ -96,6 +74,25 @@ export default function Settings() {
       </View>
     </Background>
   )
+}
+
+function useApiKeyField(keyStorage: ApiKeyStorage, regex: RegExp) {
+  const [value, setValue] = useState(null as string | null)
+  const trimmed = value?.trim() ?? ''
+  const validity: 'empty' | 'invalid' | 'valid' =
+    !trimmed ? 'empty' : regex.test(trimmed) ? 'valid' : 'invalid'
+
+  useEffect(() => { keyStorage.get().then(setValue) }, [keyStorage])
+  useEffect(() => {
+    if (validity === 'valid') keyStorage.set(trimmed)
+  }, [validity, trimmed, keyStorage])
+
+  const statusLabel =
+    validity === 'empty' ? null :
+    validity === 'invalid' ? 'INVALID' :
+    'SAVED'
+
+  return { value, setValue, validity, statusLabel }
 }
 
 const themedStyles = createThemedStyles((tokens) => ({
