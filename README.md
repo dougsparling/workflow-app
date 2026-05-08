@@ -4,7 +4,7 @@
 
 ## Demo
 
-![App demo](assets/images/demo.webp)
+![App demo](docs/demo.webp)
 
 ## Models
 
