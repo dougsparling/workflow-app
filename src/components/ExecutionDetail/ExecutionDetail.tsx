@@ -27,9 +27,7 @@ export default function ExecutionDetail({ executionId, hideHeader = false, onPre
 
   if (!job) return null
 
-  const filtered = job.messages.filter(
-    (e): e is { msg: BaseMessage; ts: number } => !SystemMessage.isInstance(e.msg),
-  )
+  const filtered = job.messages
   const isRunning = job.status === 'running'
 
   return (
@@ -74,6 +72,7 @@ export default function ExecutionDetail({ executionId, hideHeader = false, onPre
 }
 
 function messageIcon(msg: HumanMessage | AIMessage | ToolMessage): FeatherIconName {
+  if (SystemMessage.isInstance(msg)) return 'terminal'
   if (HumanMessage.isInstance(msg)) return 'user'
   if (AIMessage.isInstance(msg)) {
     if (msg.tool_calls?.length) return 'zap'
@@ -84,6 +83,7 @@ function messageIcon(msg: HumanMessage | AIMessage | ToolMessage): FeatherIconNa
 }
 
 function messageIconColor(msg: HumanMessage | AIMessage | ToolMessage, tokens: ThemeTokens): string {
+  if (SystemMessage.isInstance(msg)) return tokens.textMuted
   if (HumanMessage.isInstance(msg)) return tokens.accentBase
   if (AIMessage.isInstance(msg)) {
     if (msg.tool_calls?.length) return tokens.amberBase
@@ -94,6 +94,7 @@ function messageIconColor(msg: HumanMessage | AIMessage | ToolMessage, tokens: T
 }
 
 function messageLabel(msg: HumanMessage | AIMessage | ToolMessage): string {
+  if (SystemMessage.isInstance(msg)) return 'System'
   if (HumanMessage.isInstance(msg)) return 'Prompt'
   if (AIMessage.isInstance(msg)) {
     if (msg.tool_calls?.length) {

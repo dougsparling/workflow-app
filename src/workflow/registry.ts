@@ -24,53 +24,57 @@ const ResearcherInputSchema = Type.Object({
   category: Type.String({ minLength: 2, description: 'Topic category to research' }),
 })
 
-const researcherWorkflow = workflow(ResearcherInputSchema)
-  .step(
-    'ideate',
-    Type.Object({ topic: Type.String() }),
-    agentStep(
-      {
-        name: 'Ideation',
-        model: deepseekFlash,
-        tools: [],
-        systemPrompt:
-          'Given the input category, come up with a specific topic within that category that would make for interesting research.',
-      },
-      queueExecutor,
-    ),
-    { model: deepseekFlash.label },
-  )
-  .step(
-    'research',
-    ResearchSchema,
-    agentStep(
-      {
-        name: 'Researcher',
-        model: deepseekPro,
-        tools: [wikipedia],
-        systemPrompt:
-          'Using Wikipedia, conduct a few surface-level inquiries into the given topic, then write a report (500-1000 words) with an emphasis on surprising or unusual facts. Add citation anchors as <#> and include urls in the citation list.',
-      },
-      queueExecutor,
-    ),
-    { model: deepseekPro.label },
-  )
-  .step(
-    'outbox',
-    OutboxOutputSchema,
-    outboxStep(
-      {
-        name: 'Mailer',
-        model: qwen,
-        tools: [],
-        systemPrompt:
-          'Given the input, produce a well-formatted markdown document with a descriptive title. The output must contain "title" (a short plain-text title for the document) and "markdown" (the full content as markdown, including the title as a level-1 heading).',
-      },
-      queueExecutor,
-    ),
-    { model: qwen.label },
-  )
-  .create()
+type ModelTier = { reasoning: Model; chat: Model }
+
+function makeResearcherWorkflow({ reasoning, chat }: ModelTier) {
+  return workflow(ResearcherInputSchema)
+    .step(
+      'ideate',
+      Type.Object({ topic: Type.String() }),
+      agentStep(
+        {
+          name: 'Ideation',
+          model: chat,
+          tools: [],
+          systemPrompt:
+            'Given the input category, come up with a specific topic within that category that would make for interesting research.',
+        },
+        queueExecutor,
+      ),
+      { model: chat.label },
+    )
+    .step(
+      'research',
+      ResearchSchema,
+      agentStep(
+        {
+          name: 'Researcher',
+          model: reasoning,
+          tools: [wikipedia],
+          systemPrompt:
+            'Using Wikipedia, conduct a few surface-level inquiries into the given topic, then write a report (500-1000 words) with an emphasis on surprising or unusual facts. Add citation anchors as <#> and include urls in the citation list.',
+        },
+        queueExecutor,
+      ),
+      { model: reasoning.label },
+    )
+    .step(
+      'outbox',
+      OutboxOutputSchema,
+      outboxStep(
+        {
+          name: 'Mailer',
+          model: chat,
+          tools: [],
+          systemPrompt:
+            'Given the input, produce a well-formatted markdown document with a descriptive title. The output must contain "title" (a short plain-text title for the document) and "markdown" (the full content as markdown, including the title as a level-1 heading).',
+        },
+        queueExecutor,
+      ),
+      { model: chat.label },
+    )
+    .create()
+}
 
 const ItineraryInputSchema = Type.Object({
   destination: Type.String({ minLength: 2, description: 'Country or region to visit' }),
@@ -100,8 +104,6 @@ const PlanOutputSchema = Type.Object({
   ),
 })
 
-type ModelTier = { reasoning: Model; chat: Model }
-
 function makeItineraryWorkflow({ reasoning, chat }: ModelTier) {
   return workflow(ItineraryInputSchema)
     .step(
@@ -113,7 +115,7 @@ function makeItineraryWorkflow({ reasoning, chat }: ModelTier) {
           model: reasoning,
           tools: [wikipedia],
           systemPrompt:
-            'You are a travel expert. Use Wikipedia to research the given destination (country or region). Then select a number of cities or areas, no more than could be reasonably visited in `days` — one per day — that together make a well-paced trip (vary size, character, and geography). Output them as the `cities` array.',
+            'You are a travel expert. Use Wikipedia to research the given destination (country or region). Then select a number of cities or areas, spending 3-4 days per city. Output them as the `cities` array.',
         },
         queueExecutor,
       ),
@@ -160,9 +162,14 @@ export type WorkflowEntry = {
 
 export const workflowRegistry: WorkflowEntry[] = [
   {
-    id: 'researcher',
-    label: 'Researcher',
-    workflow: researcherWorkflow,
+    id: 'researcher-deepseek',
+    label: 'Researcher — DeepSeek',
+    workflow: makeResearcherWorkflow({ reasoning: deepseekPro, chat: deepseekFlash }),
+  },
+  {
+    id: 'researcher-qwen',
+    label: 'Researcher — Qwen',
+    workflow: makeResearcherWorkflow({ reasoning: qwen, chat: qwen }),
   },
   {
     id: 'itinerary-qwen',
