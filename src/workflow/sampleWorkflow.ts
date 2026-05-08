@@ -28,7 +28,7 @@ export const sampleWorkflow = workflow(Type.Object({ topic: Type.String() }))
       systemPrompt: 'Write a 2-sentence factual summary of the given topic.',
     },
     queueExecutor,
-  ))
+  ), { model: deepseek.label })
   .step('bullet-points', BulletsSchema, agentStep(
     {
       name: 'Bullet Formatter',
@@ -37,5 +37,5 @@ export const sampleWorkflow = workflow(Type.Object({ topic: Type.String() }))
       systemPrompt: 'Convert the provided summary into exactly 3 concise bullet points.',
     },
     queueExecutor,
-  ))
+  ), { model: qwen.label })
   .create()

@@ -7,16 +7,15 @@ import type { ThemeTokens } from '@design/theme'
 import RecordList from '@components/RecordList/RecordList'
 import ExecutionDetail from '@components/ExecutionDetail/ExecutionDetail'
 import type { WorkflowStepState } from '@store/workflowQueue'
+import type { Step } from '@workflow/workflow'
 
 interface Props {
   index: number
   step: WorkflowStepState
-  inputSchema: TSchema
-  outputSchema: TSchema
-  modelLabel?: string
+  stepDef: Step<TSchema, TSchema>
 }
 
-export default function StepSlide({ index, step, inputSchema, outputSchema, modelLabel }: Props) {
+export default function StepSlide({ index, step, stepDef }: Props) {
   const styles = useThemedStyles(themedStyles)
   const [topHeight, setTopHeight] = useState(0)
   const [bottomHeight, setBottomHeight] = useState(0)
@@ -32,12 +31,12 @@ export default function StepSlide({ index, step, inputSchema, outputSchema, mode
         style={styles.topPanel}
         onLayout={(e: LayoutChangeEvent) => setTopHeight(e.nativeEvent.layout.height)}
       >
-        <RecordList label="Inputs" schema={inputSchema} data={inputData} />
+        <RecordList label="Inputs" schema={stepDef.input} data={inputData} />
         <View style={styles.stepHeader}>
           <Text style={styles.stepIndex}>{String(index + 1).padStart(2, '0')}</Text>
           <View style={styles.stepMeta}>
             <Text style={styles.stepName}>{step.name}</Text>
-            {modelLabel && <Text style={styles.stepModel}>{modelLabel}</Text>}
+            {stepDef.model && <Text style={styles.stepModel}>{stepDef.model}</Text>}
           </View>
           <StatusBadge status={step.status} />
         </View>
@@ -59,7 +58,7 @@ export default function StepSlide({ index, step, inputSchema, outputSchema, mode
         style={styles.bottomPanel}
         onLayout={(e: LayoutChangeEvent) => setBottomHeight(e.nativeEvent.layout.height)}
       >
-        <RecordList label="Outputs" schema={outputSchema} data={outputData} />
+        <RecordList label="Outputs" schema={stepDef.output} data={outputData} />
       </View>
     </View>
   )

@@ -11,12 +11,15 @@ export type WorkflowEvent =
 
 export type WorkflowCallback = (event: WorkflowEvent) => void
 
+export type StepEvent =
+  | { type: 'execution-created'; executionId: string }
+
 export type Step<In extends TSchema, Out extends TSchema> = {
   name: string
   model?: string
   input: In
   output: Out
-  execute: (input: Static<In>, inputSchema: TSchema, outputSchema: TSchema, onExecutionCreated?: (id: string) => void) => Promise<Static<Out>>
+  execute: (input: Static<In>, inputSchema: TSchema, outputSchema: TSchema, emit: (e: StepEvent) => void) => Promise<Static<Out>>
 }
 
 export type Workflow<In extends TSchema, Out extends TSchema> = {
@@ -28,7 +31,8 @@ export type WorkflowBuilder<In extends TSchema, Out extends TSchema> = {
   step: <Next extends TSchema>(
     name: string,
     schema: Next,
-    fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema, onExecutionCreated?: (id: string) => void) => Static<Next> | Promise<Static<Next>>
+    fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema, emit: (e: StepEvent) => void) => Static<Next> | Promise<Static<Next>>,
+    options?: { model?: string }
   ) => WorkflowBuilder<In, Next>
   create: () => Workflow<In, Out>
 }
@@ -46,13 +50,13 @@ async function runSteps(steps: Step<TSchema, TSchema>[], input: unknown, callbac
   for (const [i, step] of steps.entries()) {
     callback({ type: 'step:start', stepIndex: i, stepName: step.name, input: result })
     validate(step.input, result, step.name, 'input')
+    const emit = (e: StepEvent) => {
+      if (e.type === 'execution-created') {
+        callback({ type: 'step:execution-created', stepIndex: i, executionId: e.executionId })
+      }
+    }
     try {
-      result = await step.execute(
-        result as Static<TSchema>,
-        step.input,
-        step.output,
-        (executionId) => callback({ type: 'step:execution-created', stepIndex: i, executionId }),
-      )
+      result = await step.execute(result as Static<TSchema>, step.input, step.output, emit)
       validate(step.output, result, step.name, 'output')
       callback({ type: 'step:complete', stepIndex: i, stepName: step.name, output: result })
     } catch (e) {
@@ -74,15 +78,16 @@ function makeBuilder<In extends TSchema, Out extends TSchema>(
     step<Next extends TSchema>(
       name: string,
       schema: Next,
-      fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema, onExecutionCreated?: (id: string) => void) => Static<Next> | Promise<Static<Next>>
+      fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema, emit: (e: StepEvent) => void) => Static<Next> | Promise<Static<Next>>,
+      options?: { model?: string }
     ): WorkflowBuilder<In, Next> {
       const inputSchema = steps.length > 0 ? steps[steps.length - 1].output : initialSchema
       return makeBuilder<In, Next>(initialSchema, [...steps, {
         name,
-        model: (fn as { _modelLabel?: string })._modelLabel,
+        model: options?.model,
         input: inputSchema,
         output: schema,
-        execute: (input, inputSchema, outputSchema, onExecutionCreated) => Promise.resolve(fn(input as Static<Out>, inputSchema, outputSchema, onExecutionCreated)),
+        execute: (input, inputSchema, outputSchema, emit) => Promise.resolve(fn(input as Static<Out>, inputSchema, outputSchema, emit)),
       }])
     },
     create(): Workflow<In, Out> {

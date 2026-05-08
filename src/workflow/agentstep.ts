@@ -4,6 +4,7 @@ import { type TSchema } from 'typebox'
 import { Check, Errors } from 'typebox/value'
 import z from 'zod'
 import { type AgentDef, runAgent } from './agent'
+import { type StepEvent } from './workflow'
 import { type Tool } from './tools'
 
 type AgentStepState = { ok: true; value: unknown } | { ok: false; error: Error }
@@ -19,19 +20,11 @@ export type AgentExecutor = (
   prompt: string,
 ) => AsyncGenerator<BaseMessage | AgentMeta>
 
-/**
- * Returns a step definition backed by an agent.
- *
- * @param agentDef The agent's definition.
- * @param executor Allows interception of agent runs. Can be used for agent observability + serialization, or if not set, just runs async immediately.
- * @param onExecutionCreated Called when the executor yields an AgentMeta with an executionId.
- * @returns Step definition with erased result type (validation done at runtime)
- */
 export function agentStep<T = unknown>(
   agentDef: AgentDef,
   executor: AgentExecutor = runAgent,
 ) {
-  const fn = async (input: unknown, inputSchema: TSchema, outputSchema: TSchema, onExecutionCreated?: (id: string) => void): Promise<T> => {
+  return async (input: unknown, inputSchema: TSchema, outputSchema: TSchema, emit: (e: StepEvent) => void): Promise<T> => {
     const { tools, getAgentStepState } = makeStepTools(input, outputSchema)
     const systemPrompt = extendPromptForWorkflow(agentDef.systemPrompt, inputSchema, outputSchema)
 
@@ -42,7 +35,7 @@ export function agentStep<T = unknown>(
         'Begin.',
       )) {
         if ('_executionMeta' in item) {
-          onExecutionCreated?.(item.executionId)
+          emit({ type: 'execution-created', executionId: item.executionId })
           continue
         }
         // discard messages — agentStep only cares about step state via complete_step / fail_step
@@ -56,8 +49,6 @@ export function agentStep<T = unknown>(
     if (state && !state.ok) throw state.error
     throw agentError ?? new Error('Agent finished without calling complete_step or fail_step')
   }
-  ;(fn as { _modelLabel?: string })._modelLabel = agentDef.model.label
-  return fn
 }
 
 /**
@@ -124,35 +115,38 @@ function makeStepTools(input: unknown, outputSchema: TSchema) {
  *
  * Note the input and output schema definitions embed validation information, not just shape.
  *
- * @param original The agent's base prompt.
+ * @param originalPrompt The agent's base prompt.
  * @param inputSchema Schema of the step's input
  * @param outputSchema Schema of the step's output
  * @returns A single combined workflow + agent system prompt.
  */
 function extendPromptForWorkflow(
-  original: string,
+  originalPrompt: string,
   inputSchema: TSchema,
   outputSchema: TSchema,
 ): string {
   return `You are a step inside an automated workflow pipeline. There is no user to interact with.
 
 ## Your task
-${original}
+${originalPrompt}
 
-## Input schema
+<inputSchema>
 \`\`\`json
 ${JSON.stringify(inputSchema, null, 2)}
 \`\`\`
+</inputSchema>
 
-## Output schema
+<outputSchema>
 \`\`\`json
 ${JSON.stringify(outputSchema, null, 2)}
 \`\`\`
+</outputSchema>
 
-## Workflow control tools
+<workflowControlTools>
 - \`read_input\`: Read a named field from this step's input
 - \`complete_step\`: Submit your output and complete this step — will fail if the output doesn't satisfy the output schema, so you may retry
 - \`fail_step\`: Abort this step (and the workflow) with a reason — use only if the task cannot be completed
+</workflowControlTools>
 
 You MUST call either \`complete_step\` or \`fail_step\` before finishing. Do not produce a final text response without calling one of them.`
 }

@@ -9,6 +9,8 @@ import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import StepSlide from '@components/StepSlide/StepSlide'
 import { useWorkflowStore } from '@store/workflowQueue'
+import type { Step } from '@workflow/workflow'
+import type { TSchema } from 'typebox'
 
 const PEEK = 24
 
@@ -72,9 +74,7 @@ export default function WorkflowScreen() {
               <StepSlide
                 index={index}
                 step={step}
-                inputSchema={stepDef.input}
-                outputSchema={stepDef.output}
-                modelLabel={stepDef.model}
+                stepDef={stepDef as Step<TSchema, TSchema>}
               />
             )
           }}
