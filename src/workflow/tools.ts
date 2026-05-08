@@ -5,7 +5,7 @@ export type Tool = StructuredToolInterface
 
 export const wikipedia = new WikipediaQueryRun({
   topKResults: 3,
-  maxDocContentLength: 4000,
+  maxDocContentLength: 10_000,
 }) as Tool
 
 const tools: Tool[] = [wikipedia]

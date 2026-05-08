@@ -1,6 +1,5 @@
 import { Type } from 'typebox'
 import type { TSchema } from 'typebox'
-import { tool } from '@langchain/core/tools'
 import { enqueueAsync } from '@store/executionQueue'
 import { workflow } from './workflow'
 import type { Workflow } from './workflow'
@@ -21,34 +20,11 @@ const queueExecutor: AgentExecutor = async function* (def, prompt): AsyncGenerat
   await promise
 }
 
-const randomCategory = tool(
-  () => {
-    const categories = [
-      'Artificial Intelligence',
-      'Space Exploration',
-      'Ancient Civilizations',
-      'Climate Science',
-      'Neuroscience',
-      'Quantum Computing',
-      'Marine Biology',
-      'Renewable Energy',
-      'Philosophy of Mind',
-      'Genetic Engineering',
-      'Cybersecurity',
-      'Cultural Anthropology',
-      'Economic Theory',
-      'Particle Physics',
-      'Evolutionary Biology',
-    ]
-    return categories[Math.floor(Math.random() * categories.length)]
-  },
-  {
-    name: 'get_category',
-    description: 'Returns a random category',
-  },
-)
+const ResearcherInputSchema = Type.Object({
+  category: Type.String({ minLength: 2, description: 'Topic category to research' }),
+})
 
-const researcherWorkflow = workflow(Type.Void)
+const researcherWorkflow = workflow(ResearcherInputSchema)
   .step(
     'ideate',
     Type.Object({ topic: Type.String() }),
@@ -56,9 +32,9 @@ const researcherWorkflow = workflow(Type.Void)
       {
         name: 'Ideation',
         model: deepseekFlash,
-        tools: [randomCategory],
+        tools: [],
         systemPrompt:
-          'Come up with a random but broad topic for research, based on a random category.',
+          'Given the input category, come up with a specific topic within that category that would make for interesting research.',
       },
       queueExecutor,
     ),
@@ -73,7 +49,7 @@ const researcherWorkflow = workflow(Type.Void)
         model: deepseekPro,
         tools: [wikipedia],
         systemPrompt:
-          'Use Wikipedia (at most five tool calls) to conduct brief research on the given topic, then write a report (500-1000 words) with an emphasis on surprising or unusual facts. Add citation anchors as <#> and include urls in the citation list.',
+          'Using Wikipedia, conduct a few surface-level inquiries into the given topic, then write a report (500-1000 words) with an emphasis on surprising or unusual facts. Add citation anchors as <#> and include urls in the citation list.',
       },
       queueExecutor,
     ),
@@ -96,8 +72,6 @@ const researcherWorkflow = workflow(Type.Void)
   )
   .create()
 
-// ── Travel Itinerary ─────────────────────────────────────────────────────────
-
 const ItineraryInputSchema = Type.Object({
   destination: Type.String({ minLength: 2, description: 'Country or region to visit' }),
   days: Type.Integer({ minimum: 1, maximum: 14, description: 'Number of days' }),
@@ -118,6 +92,12 @@ const PlanOutputSchema = Type.Object({
     }),
     { minItems: 1 },
   ),
+  citations: Type.Array(
+    Type.Object({
+      label: Type.String,
+      url: Type.String,
+    }),
+  ),
 })
 
 type ModelTier = { reasoning: Model; chat: Model }
@@ -133,7 +113,7 @@ function makeItineraryWorkflow({ reasoning, chat }: ModelTier) {
           model: reasoning,
           tools: [wikipedia],
           systemPrompt:
-            'You are a travel expert. Use Wikipedia to research the given destination (country or region). Then select exactly the number of cities or areas specified in `days` — one per day — that together make a well-paced trip (vary size, character, and geography). Output them as the `cities` array.',
+            'You are a travel expert. Use Wikipedia to research the given destination (country or region). Then select a number of cities or areas, no more than could be reasonably visited in `days` — one per day — that together make a well-paced trip (vary size, character, and geography). Output them as the `cities` array.',
         },
         queueExecutor,
       ),
@@ -148,7 +128,7 @@ function makeItineraryWorkflow({ reasoning, chat }: ModelTier) {
           model: chat,
           tools: [wikipedia],
           systemPrompt:
-            'You are a travel planner. For each city in the `cities` array, call Wikipedia to research it (top attractions, food, local tips, logistics). Then write a one-day itinerary for that city covering morning, afternoon, and evening. Produce one `plans` entry per city with `city` and `itinerary` fields.',
+            'You are a travel planner. For each city in the `cities` array, call Wikipedia to research it (top attractions, food, local tips, logistics). Then write a one-day itinerary for that city covering morning, afternoon, and evening. Produce one `plans` entry per city with `city` and `itinerary` fields. Ground your response in the articles returned by the Wikipedia tool, including them in citations.',
         },
         queueExecutor,
       ),
