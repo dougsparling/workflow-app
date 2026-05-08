@@ -30,7 +30,7 @@ export default function Workflows() {
   const styles = useThemedStyles(themedStyles)
 
   // TODO: fix schema types
-  const runSample = () => enqueue('Topic Summarizer', sampleWorkflow as unknown as Workflow<TSchema, TSchema>, { topic: 'quantum computing' })
+  const runSample = () => enqueue('Researcher', sampleWorkflow as unknown as Workflow<TSchema, TSchema>, { topic: 'quantum computing' })
 
   if (jobs.length === 0) {
     return (

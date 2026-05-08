@@ -16,9 +16,10 @@ interface Props {
   index: number
   step: WorkflowStepState
   stepDef: Step<TSchema, TSchema>
+  onModalChange?: (open: boolean) => void
 }
 
-export default function StepSlide({ index, step, stepDef }: Props) {
+export default function StepSlide({ index, step, stepDef, onModalChange }: Props) {
   const styles = useThemedStyles(themedStyles)
   const [topHeight, setTopHeight] = useState(0)
   const [bottomHeight, setBottomHeight] = useState(0)
@@ -49,7 +50,11 @@ export default function StepSlide({ index, step, stepDef }: Props) {
       {/* Middle: messages */}
       <View style={[styles.messages, { paddingTop: topHeight, paddingBottom: bottomHeight }]}>
         {executionId ? (
-          <ExecutionDetail executionId={executionId} hideHeader onPressMessage={setSelectedMsg} />
+          <ExecutionDetail
+            executionId={executionId}
+            hideHeader
+            onPressMessage={msg => { setSelectedMsg(msg); onModalChange?.(true) }}
+          />
         ) : (
           <View style={styles.pendingPlaceholder}>
             <Text style={styles.pendingText}>Waiting to start…</Text>
@@ -65,7 +70,10 @@ export default function StepSlide({ index, step, stepDef }: Props) {
         <RecordList label="Outputs" schema={stepDef.output} data={outputData} />
       </View>
 
-      <BottomSheet visible={selectedMsg !== null} onDismiss={() => setSelectedMsg(null)}>
+      <BottomSheet
+        visible={selectedMsg !== null}
+        onDismiss={() => { setSelectedMsg(null); onModalChange?.(false) }}
+      >
         {selectedMsg && (
           <MessageContent message={selectedMsg} modelName={stepDef.model} />
         )}

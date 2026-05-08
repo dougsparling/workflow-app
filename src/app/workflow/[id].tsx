@@ -22,6 +22,7 @@ export default function WorkflowScreen() {
   const styles = useThemedStyles(themedStyles)
   const carouselRef = useRef<ICarouselInstance>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [detailOpen, setDetailOpen] = useState(false)
   const prevRef = useRef<{ index: number; status: string }>({ index: -1, status: '' })
 
   const currentStatus = job?.steps[activeIndex]?.status ?? ''
@@ -33,7 +34,7 @@ export default function WorkflowScreen() {
       prevRef.current = { index: activeIndex, status: currentStatus }
       return
     }
-    if (prev.status === 'running' && currentStatus === 'complete') {
+    if (prev.status === 'running' && currentStatus === 'complete' && !detailOpen) {
       const nextIndex = activeIndex + 1
       if (nextIndex < job.steps.length) {
         setTimeout(() => {
@@ -42,7 +43,7 @@ export default function WorkflowScreen() {
       }
     }
     prevRef.current = { index: activeIndex, status: currentStatus }
-  }, [currentStatus, activeIndex])
+  }, [currentStatus, activeIndex, detailOpen])
 
   if (!job) return null
 
@@ -96,6 +97,7 @@ export default function WorkflowScreen() {
                 index={index}
                 step={step}
                 stepDef={stepDef as Step<TSchema, TSchema>}
+                onModalChange={setDetailOpen}
               />
             )
           }}
