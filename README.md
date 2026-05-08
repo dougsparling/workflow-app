@@ -4,6 +4,7 @@
 
 ## Demo
 
+![App demo](assets/images/demo.webp)
 
 ## Models
 
