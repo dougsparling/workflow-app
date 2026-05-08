@@ -3,8 +3,10 @@ import { Pressable, useWindowDimensions, View, Text } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router } from 'expo-router'
 import Carousel, { type ICarouselInstance } from 'react-native-reanimated-carousel'
+import type { PanGesture } from 'react-native-gesture-handler'
 import { Feather } from '@expo/vector-icons'
 import StatusBadge from '@design/StatusBadge/StatusBadge'
+import { getStatusColors, type ExecutionStatus } from '@util/status'
 import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import StepSlide from '@components/StepSlide/StepSlide'
@@ -50,15 +52,6 @@ export default function WorkflowScreen() {
 
   const slideWidth = screenWidth - PEEK * 2
 
-  function statusColor(status: string): string {
-    switch (status) {
-      case 'complete': return t.statusComplete
-      case 'running':  return t.statusRunning
-      case 'failed':   return t.statusFailed
-      default:         return t.statusPending
-    }
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -75,7 +68,7 @@ export default function WorkflowScreen() {
         {job.steps.map((step, i) => (
           <Pressable
             key={i}
-            style={[styles.indicatorBar, { backgroundColor: i === activeIndex ? statusColor(step.status) : t.borderStrong }]}
+            style={[styles.indicatorBar, { backgroundColor: i === activeIndex ? getStatusColors(t, step.status as ExecutionStatus).dot : t.borderStrong }]}
             onPress={() => carouselRef.current?.scrollTo({ index: i, animated: true })}
           />
         ))}
@@ -92,6 +85,9 @@ export default function WorkflowScreen() {
           onSnapToItem={setActiveIndex}
           onScrollStart={() => setIsScrolling(true)}
           onScrollEnd={() => setIsScrolling(false)}
+          onConfigurePanGesture={(panGesture: PanGesture) => {
+            panGesture.activeOffsetX([-10, 10])
+          }}
           renderItem={({ index }) => {
             const step = job.steps[index]
             const stepDef = job.wf.steps[index]

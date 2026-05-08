@@ -132,12 +132,16 @@ const darkColors = {
   errorBorder: 'rgba(192,57,43,0.28)' as const,
 
   // ── Status ────────────────────────────────────────────────────
-  statusRunning:  '#29B8A8',
-  statusComplete: '#3DBA6F',
-  statusPending:  '#C8892A',
-  statusFailed:   '#C0392B',
-  statusIdle:     '#7A8080',
-  statusStopped:  '#7A8080',
+  statusRunning:       '#29B8A8',
+  statusComplete:      '#3DBA6F',
+  statusPending:       '#C8892A',
+  statusFailed:        '#C0392B',
+  statusIdle:          '#7A8080',
+  statusStopped:       '#7A8080',
+  statusRunningGhost:  'rgba(41,184,168,0.10)' as const,
+  statusRunningBorder: 'rgba(41,184,168,0.28)' as const,
+  statusIdleGhost:     'rgba(122,128,128,0.08)' as const,
+  statusIdleBorder:    'rgba(122,128,128,0.18)' as const,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -197,12 +201,16 @@ const lightColors = {
 
   // ── Status ────────────────────────────────────────────────────
   // Deepened ~10% vs dark theme for adequate contrast on light surfaces.
-  statusRunning:  '#1E9486',  // teal
-  statusComplete: '#2E9658',  // green (= accentBase)
-  statusPending:  '#A86E1A',  // amber (= amberBase)
-  statusFailed:   '#B02E22',  // red (= errorBase)
-  statusIdle:     '#72786F',  // grey (= textMuted)
-  statusStopped:  '#72786F',
+  statusRunning:       '#1E9486',  // teal
+  statusComplete:      '#2E9658',  // green (= accentBase)
+  statusPending:       '#A86E1A',  // amber (= amberBase)
+  statusFailed:        '#B02E22',  // red (= errorBase)
+  statusIdle:          '#72786F',  // grey (= textMuted)
+  statusStopped:       '#72786F',
+  statusRunningGhost:  'rgba(30,148,134,0.10)' as const,   // #1E9486 at 10%
+  statusRunningBorder: 'rgba(30,148,134,0.28)' as const,   // #1E9486 at 28%
+  statusIdleGhost:     'rgba(114,120,111,0.08)' as const,  // #72786F at 8%
+  statusIdleBorder:    'rgba(114,120,111,0.18)' as const,  // #72786F at 18%
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -256,6 +264,10 @@ export type ColorTokens = {
   statusFailed: string
   statusIdle: string
   statusStopped: string
+  statusRunningGhost: string
+  statusRunningBorder: string
+  statusIdleGhost: string
+  statusIdleBorder: string
 }
 
 export type SharedTokens = typeof sharedTokens

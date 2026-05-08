@@ -1,8 +1,10 @@
 import { View, Text } from 'react-native'
-import { createThemedStyles, useThemedStyles } from '../theme'
+import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
+import { logLevelColor } from '@util/status'
+import type { LogLevel } from '@util/status'
 
-export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG'
+export type { LogLevel } from '@util/status'
 
 type Props = {
   time: string
@@ -12,17 +14,12 @@ type Props = {
 
 export default function LogLine({ time, level, message }: Props) {
   const styles = useThemedStyles(themedStyles)
-
-  const levelStyle =
-    level === 'INFO'  ? styles.levelInfo  :
-    level === 'WARN'  ? styles.levelWarn  :
-    level === 'ERROR' ? styles.levelError :
-    styles.levelDebug
+  const { tokens } = useTheme()
 
   return (
     <View style={styles.row}>
       <Text style={styles.time}>{time}</Text>
-      <Text style={[styles.level, levelStyle]}>{level}</Text>
+      <Text style={[styles.level, { color: logLevelColor(level, tokens) }]}>{level}</Text>
       <Text style={styles.message} numberOfLines={2}>{message}</Text>
     </View>
   )
@@ -49,10 +46,6 @@ const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
     flexShrink: 0,
     lineHeight: tokens.textSm * tokens.leadingNormal,
   },
-  levelInfo:  { color: tokens.accentBase  },
-  levelWarn:  { color: tokens.amberBase   },
-  levelError: { color: tokens.errorBright },
-  levelDebug: { color: tokens.textMuted   },
   message: {
     fontFamily: tokens.fontMono,
     fontSize: tokens.textSm,

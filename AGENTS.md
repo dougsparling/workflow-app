@@ -88,6 +88,7 @@ The design system is built around a theme context (`theme.tsx`) that provides li
 @contexts/*    → src/contexts/*
 @workflow/*    → src/workflow/*
 @store/*       → src/store/*
+@util/*        → src/util/*
 ```
 
 ## Key Files

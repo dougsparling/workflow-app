@@ -3,7 +3,8 @@ import { View, Text, Pressable, StyleSheet } from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
-import StatusBadge, { type ExecutionStatus } from '../StatusBadge/StatusBadge'
+import StatusBadge from '../StatusBadge/StatusBadge'
+import type { ExecutionStatus } from '@util/status'
 
 export type FeatherIconName = React.ComponentProps<typeof Feather>['name']
 

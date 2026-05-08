@@ -48,7 +48,7 @@ export default function BottomSheet({ visible, onDismiss, children }: Props) {
           <Pressable style={{ flex: 1 }} onPress={handleDismiss} />
         </Animated.View>
         <Animated.View style={[styles.sheet, { transform: [{ translateY: sheetTranslateY }] }]}>
-          <TouchableOpacity style={styles.closeButton} onPress={handleDismiss}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleDismiss} hitSlop={12}>
             <Feather name="x" size={20} color={tokens.textMuted} />
           </TouchableOpacity>
           {children}

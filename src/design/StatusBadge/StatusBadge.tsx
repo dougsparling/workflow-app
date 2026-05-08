@@ -1,39 +1,8 @@
 import { View, Text } from 'react-native'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
-
-export type ExecutionStatus =
-  | 'running'
-  | 'complete'
-  | 'pending'
-  | 'failed'
-  | 'idle'
-  | 'stopped'
-  | 'aborted'
-
-type StatusColors = {
-  bg: string
-  border: string
-  text: string
-  dot: string
-}
-
-function getStatusColors(tokens: ThemeTokens, status: ExecutionStatus): StatusColors {
-  switch (status) {
-    case 'running':
-      return { bg: 'rgba(41,184,168,0.10)', border: 'rgba(41,184,168,0.28)', text: tokens.statusRunning,  dot: tokens.statusRunning  }
-    case 'complete':
-      return { bg: 'rgba(61,186,111,0.08)', border: 'rgba(61,186,111,0.20)', text: tokens.statusComplete, dot: tokens.statusComplete }
-    case 'pending':
-      return { bg: tokens.amberGhost,        border: tokens.amberBorder,      text: tokens.amberBase,      dot: tokens.amberBase      }
-    case 'failed':
-      return { bg: tokens.errorGhost,        border: tokens.errorBorder,      text: tokens.errorBright,    dot: tokens.errorBase      }
-    case 'idle':
-    case 'stopped':
-    default:
-      return { bg: 'rgba(122,128,128,0.08)', border: 'rgba(122,128,128,0.18)', text: tokens.textMuted,    dot: tokens.textMuted      }
-  }
-}
+import { getStatusColors } from '@util/status'
+import type { ExecutionStatus } from '@util/status'
 
 type Props = {
   status: ExecutionStatus
