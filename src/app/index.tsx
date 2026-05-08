@@ -5,5 +5,5 @@ import { polyfillWebCrypto } from 'expo-standard-web-crypto'
 polyfillWebCrypto()
 
 export default function Index() {
-  return <Redirect href="/executions" />
+  return <Redirect href="/workflows" />
 }

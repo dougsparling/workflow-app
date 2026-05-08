@@ -32,7 +32,7 @@ export const deepseekApiKey = {
   get: async () => await AsyncStorage.getItem(DEEPSEEK_KEY_STORAGE)
 }
 
-const makeDeepSeek = async () => {
+const makeDeepSeekFlash = async () => {
   let apiKey = await deepseekApiKey.get() ?? undefined
   return new ChatDeepSeek({
     model: 'deepseek-v4-flash',
@@ -41,8 +41,18 @@ const makeDeepSeek = async () => {
   })
 }
 
-const qwen = { label: "Qwen (Local)", factory: makeQwen }
-const deepseek = { label: "DeepSeek (Flash)", factory: makeDeepSeek }
-const models: Model[] = [qwen, deepseek]
+const makeDeepSeekPro = async () => {
+  let apiKey = await deepseekApiKey.get() ?? undefined
+  return new ChatDeepSeek({
+    model: 'deepseek-v4-pro',
+    apiKey,
+    timeout: 30000,
+  })
+}
 
-export { models as default, qwen, deepseek }
+const qwen = { label: "Qwen (Local)", factory: makeQwen }
+const deepseekFlash = { label: "DeepSeek (Flash)", factory: makeDeepSeekFlash }
+const deepseekPro = { label: "DeepSeek (Flash)", factory: makeDeepSeekPro }
+const models: Model[] = [qwen, deepseekFlash, deepseekPro]
+
+export { models as default, qwen, deepseekFlash, deepseekPro }
