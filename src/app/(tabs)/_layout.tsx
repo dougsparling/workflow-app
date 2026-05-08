@@ -2,43 +2,13 @@ import { Tabs } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@design/theme'
+import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs'
 
 export default function TabLayout() {
-  const { tokens: t } = useTheme()
-  const insets = useSafeAreaInsets()
+  const screenOptions = useTabScreenOptions()
 
   return (
-    <Tabs
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: t.bgSurface,
-          borderBottomWidth: 1,
-          borderBottomColor: t.borderSubtle,
-        },
-        headerShadowVisible: false,
-        headerTitleStyle: {
-          fontFamily: t.fontMono,
-          fontSize: t.text2xl,
-          fontWeight: t.weightSemibold,
-          color: t.textPrimary,
-          letterSpacing: t.trackingTight,
-        },
-        headerTintColor: t.textPrimary,
-        tabBarStyle: {
-          backgroundColor: t.bgSurface,
-          borderTopColor: t.borderDefault,
-          borderTopWidth: 1,
-          height: 56 + insets.bottom,
-        },
-        tabBarActiveTintColor: t.accentBase,
-        tabBarInactiveTintColor: t.textDisabled,
-        tabBarLabelStyle: {
-          fontFamily: t.fontMono,
-          fontSize: t.textXs,
-          letterSpacing: t.trackingWide,
-        },
-      }}
-    >
+    <Tabs screenOptions={screenOptions}>
       <Tabs.Screen
         name="outbox"
         options={{
@@ -52,6 +22,7 @@ export default function TabLayout() {
         name="executions"
         options={{
           title: 'executions',
+          href: null,
           tabBarIcon: ({ color, size }) => (
             <Feather name="play-circle" size={size} color={color} />
           ),
@@ -70,6 +41,7 @@ export default function TabLayout() {
         name="agents"
         options={{
           title: 'agents',
+          href: null,
           tabBarIcon: ({ color, size }) => (
             <Feather name="cpu" size={size} color={color} />
           ),
@@ -86,4 +58,39 @@ export default function TabLayout() {
       />
     </Tabs>
   )
+}
+
+function useTabScreenOptions(): BottomTabNavigationOptions {
+  const { tokens: t } = useTheme()
+  const insets = useSafeAreaInsets()
+
+  return {
+    headerStyle: {
+      backgroundColor: t.bgSurface,
+      borderBottomWidth: 1,
+      borderBottomColor: t.borderSubtle,
+    },
+    headerShadowVisible: false,
+    headerTitleStyle: {
+      fontFamily: t.fontMono,
+      fontSize: t.text2xl,
+      fontWeight: t.weightSemibold,
+      color: t.textPrimary,
+      letterSpacing: t.trackingTight,
+    },
+    headerTintColor: t.textPrimary,
+    tabBarStyle: {
+      backgroundColor: t.bgSurface,
+      borderTopColor: t.borderDefault,
+      borderTopWidth: 1,
+      height: 56 + insets.bottom,
+    },
+    tabBarActiveTintColor: t.accentBase,
+    tabBarInactiveTintColor: t.textDisabled,
+    tabBarLabelStyle: {
+      fontFamily: t.fontMono,
+      fontSize: t.textXs,
+      letterSpacing: t.trackingWide,
+    },
+  }
 }
