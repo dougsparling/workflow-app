@@ -10,7 +10,7 @@ import { runAgent, type AgentDef } from "./agent"
 import type { Tool } from "./tools"
 
 describe("runAgent", () => {
-  describe("basic execution", () => {
+  describe("execution", () => {
     it("yields system message then human message", async () => {
       const { agent } = createMockAgent()
       const gen = runAgent(agent, "Hello!")
@@ -42,8 +42,6 @@ describe("runAgent", () => {
       expect(yielded[2]).toBeInstanceOf(AIMessage)
       expect(yielded[2].content).toBe("Hello, world!")
     })
-
-
   })
 
   describe("tool calling", () => {
@@ -64,8 +62,8 @@ describe("runAgent", () => {
           }),
         )
         .mockResolvedValue(new AIMessage({ content: "Done" }))
-      toolAInvoke.mockResolvedValue(new ToolMessage({ content: "Result A", tool_call_id: "call_a" }))
-      toolBInvoke.mockResolvedValue(new ToolMessage({ content: "Result B", tool_call_id: "call_b" }))
+      toolAInvoke.mockResolvedValue("Result A")
+      toolBInvoke.mockResolvedValue("Result B")
 
       const yielded = await exhaust(agent, "Go")
 
@@ -75,7 +73,9 @@ describe("runAgent", () => {
       expect(yielded[3]).toBeInstanceOf(ToolMessage)
       expect(yielded[3].content).toBe("Result B")
       expect(toolAInvoke).toHaveBeenCalledTimes(1)
+      expect(toolAInvoke).toHaveBeenCalledWith({ x: 1 })
       expect(toolBInvoke).toHaveBeenCalledTimes(1)
+      expect(toolBInvoke).toHaveBeenCalledWith({ y: 2 })
     })
 
     it("yields unknown-tool warning when no handler matches", async () => {
@@ -108,12 +108,13 @@ describe("runAgent", () => {
           }),
         )
         .mockResolvedValueOnce(new AIMessage({ content: "Done" }))
-      toolInvoke.mockResolvedValue(new ToolMessage({ content: "Weather", tool_call_id: "c1" }))
+      toolInvoke.mockResolvedValue("Weather")
 
       const yielded = await exhaust(agent, "Go")
 
       expect(yielded).toHaveLength(4)
       expect(yielded[2]).toBeInstanceOf(ToolMessage)
+      expect(yielded[2].content).toBe("Weather")
       expect(yielded[3]).toBeInstanceOf(AIMessage)
       expect(yielded[3].content).toBe("Done")
       expect(modelInvoke).toHaveBeenCalledTimes(2)
@@ -128,7 +129,7 @@ describe("runAgent", () => {
       await expect(exhaust(agent, "Hi")).rejects.toThrow("LLM down")
     })
 
-    it("throws on tool invoke error", async () => {
+    it("yields error ToolMessage when tool invoke fails", async () => {
       const toolFailing = mockTool("failing")
       toolFailing.invoke = jest.fn<(...args: any[]) => Promise<any>>().mockRejectedValue(new Error("Tool exploded"))
       const { agent, modelInvoke } = createMockAgent({ tools: [toolFailing] })
@@ -140,9 +141,18 @@ describe("runAgent", () => {
             tool_calls: [{ name: "failing", args: {}, id: "c1" }],
           }),
         )
-        .mockResolvedValue(new AIMessage({ content: "never" }))
+        .mockResolvedValue(new AIMessage({ content: "recovered" }))
 
-      await expect(exhaust(agent, "Hi")).rejects.toThrow("Tool exploded")
+      const yielded = await exhaust(agent, "Hi")
+
+      // Should yield system, human, error ToolMessage, then final answer
+      expect(yielded).toHaveLength(4)
+      expect(yielded[2]).toBeInstanceOf(ToolMessage)
+      expect(yielded[2].content).toMatch(/Error invoking tool failing/)
+      expect(yielded[2].content).toMatch(/Tool exploded/)
+      expect(yielded[3]).toBeInstanceOf(AIMessage)
+      expect(yielded[3].content).toBe("recovered")
+      expect(modelInvoke).toHaveBeenCalledTimes(2)
     })
 
     it("throws when tools provided but model lacks bindTools", async () => {
@@ -221,7 +231,7 @@ describe("runAgent", () => {
           }),
         )
         .mockResolvedValue(new AIMessage({ content: "won't happen" }))
-      toolInvoke.mockResolvedValue(new ToolMessage({ content: "R", tool_call_id: "c1" }))
+      toolInvoke.mockResolvedValue("R")
 
       const gen = runAgent(agent, "Hi", ac.signal)
       await gen.next() // system
