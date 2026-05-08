@@ -43,7 +43,7 @@ There is another patch to `@langchain/openai` to provide pass-through support fo
 
 ## Directory Conventions
 
-- `src/app/` — Expo Router file-based navigation root. Contains `_layout.tsx` (root layout wrapping AssetLoader, ThemeProvider, and Stack navigator), `index.tsx` (redirect to executions tab), and `(tabs)/` (bottom tab navigator with executions, workflows, agents, and settings screens).
+- `src/app/` — Expo Router file-based navigation root. Contains `_layout.tsx` (root layout wrapping AssetLoader, ThemeProvider, and Stack navigator), `index.tsx` (redirect to workflows tab), and `(tabs)/` (bottom tab navigator with outbox, workflows, and settings screens).
 - `src/contexts/` — React contexts, providers, and loaders (e.g. `AssetLoader`). Each file exports a provider or hook.
 - `src/components/` — Reusable UI components. Each component lives in its own directory, no barrel files. Pattern: `components/{name}/{name}.tsx`.
 - `src/design/` — Design system: theme provider, design tokens, and reusable themed UI components.
@@ -71,8 +71,7 @@ The design system is built around a theme context (`theme.tsx`) that provides li
 - **`LogLine/LogLine.tsx`** — Log entry row with timestamp, level badge (INFO/WARN/ERROR/DEBUG), and message.
 - **`MultiToggle/MultiToggle.tsx`** — Segmented toggle control for selecting among a fixed set of labeled options.
 - **`SectionLabel/SectionLabel.tsx`** — Uppercased section header label (no horizontal padding; relies on parent container for layout padding).
-- **`StatusBadge/StatusBadge.tsx`** — Status indicator with colored dot and label for `running`, `complete`, `pending`, `failed`, `idle`, `stopped` states.
-- **`StepRow/StepRow.tsx`** — Workflow step row with icon badge, name, duration, and status badge; highlights running steps with a left accent border.
+- **`StatusBadge/StatusBadge.tsx`** — Status indicator with colored dot and label for `running`, `complete`, `pending`, `failed`, `idle`, `stopped`, `aborted` states.
 - **`TextInput/TextInput.tsx`** — Themed text input with label, hint, error state, and disabled state.
 
 ### Style rules
@@ -96,15 +95,15 @@ The design system is built around a theme context (`theme.tsx`) that provides li
 - `src/workflow/agent.ts` — Core agentic loop (`runAgent`) with tool dispatch and streaming callback.
 - `src/workflow/agentstep.ts` — Binds an agent to a workflow step: injects workflow control tools (`read_input`, `complete_step`, `fail_step`), extends the system prompt with input/output schemas, and resolves via an outcome state object after `runAgent` completes. Used as `.step("name", Schema, agentStep(agent))`.
 - `src/workflow/models.ts` — Model configurations: local Qwen (via ChatOpenAI) and DeepSeek Flash (via ChatDeepSeek), with AsyncStorage-persisted API key.
-- `src/workflow/tools.ts` — Custom tool definitions: `get_weather` and `get_exchange_rate`.
+- `src/workflow/tools.ts` — Tool definitions: `wikipedia` (WikipediaQueryRun).
 - `src/workflow/workflow.ts` — Type-safe workflow builder with composable steps (Mastra-inspired). Each step's executor receives `(input, inputSchema, outputSchema)` — plain lambdas can ignore the schema params
 - `src/workflow/workflow.test.ts` — Jest tests for the workflow builder.
 - `src/store/executionQueue.ts` — Zustand store managing job lifecycle (enqueue, cancel, sequential execution, message streaming).
 - `src/app/_layout.tsx` — Root layout wrapping AssetLoader, ThemeProvider, and Stack navigator.
-- `src/app/index.tsx` — Redirect to the Executions tab.
-- `src/app/(tabs)/_layout.tsx` — Bottom tab navigator (executions, workflows, agents, settings).
-- `src/app/(tabs)/agents.tsx` — Agent selection screen with predefined agents (Weather, Finance, Research, Assistant) and a run-prompt bottom sheet.
-- `src/app/(tabs)/executions.tsx` — Execution queue screen showing job cards with status and cancel support.
-- `src/app/(tabs)/settings.tsx` — Settings screen with DeepSeek API key input and theme preference selector.
+- `src/app/index.tsx` — Redirect to the workflows tab.
+- `src/app/(tabs)/_layout.tsx` — Bottom tab navigator (outbox, workflows, settings). The executions route exists but is hidden (`href: null`) and accessible only via programmatic navigation.
+- `src/app/(tabs)/outbox.tsx` — Outbox document list screen.
+- `src/app/(tabs)/executions.tsx` — Execution queue screen showing job cards with status and cancel support (hidden tab, reachable via navigation).
+- `src/app/(tabs)/settings.tsx` — Settings screen with API key inputs (DeepSeek, Anthropic) and theme preference selector.
 - `src/components/ExecutionDetail/ExecutionDetail.tsx` — Execution detail view showing agent name, prompt, status, and step-by-step message log.
 - `src/contexts/asset-loader.tsx` — Font loading and splash screen management.

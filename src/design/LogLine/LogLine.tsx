@@ -1,5 +1,3 @@
-// components/LogLine/LogLine.tsx
-import React from 'react'
 import { View, Text } from 'react-native'
 import { createThemedStyles, useThemedStyles } from '../theme'
 import type { ThemeTokens } from '../theme'

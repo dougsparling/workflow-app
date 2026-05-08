@@ -7,7 +7,3 @@ export const wikipedia = new WikipediaQueryRun({
   topKResults: 3,
   maxDocContentLength: 10_000,
 }) as Tool
-
-const tools: Tool[] = [wikipedia]
-
-export default tools

@@ -1,6 +1,4 @@
 import { create } from 'zustand'
-import { AIMessage, ToolMessage } from '@langchain/core/messages'
-
 import type { BaseMessage } from '@langchain/core/messages'
 import type { AgentDef } from '@workflow/agent'
 import { runAgent } from '@workflow/agent'
@@ -65,10 +63,4 @@ export function enqueueAsync(def: AgentDef, prompt: string): { jobId: string; pr
     })
   })
   return { jobId, promise }
-}
-
-export function messageLevel(msg: BaseMessage): 'INFO' | 'DEBUG' | null {
-  if (AIMessage.isInstance(msg)) return 'INFO'
-  if (ToolMessage.isInstance(msg)) return 'DEBUG'
-  return null
 }

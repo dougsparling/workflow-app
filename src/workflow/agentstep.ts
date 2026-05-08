@@ -83,7 +83,7 @@ function makeStepTools(input: unknown, outputSchema: TSchema) {
     ({ output }) => {
       if (!Check(outputSchema, output)) {
         const errors = [...Errors(outputSchema, output)]
-        return `Output validation failed: ${errors.map((e) => `${e.instancePath || '(root)'}: ${e.message}`).join('; ')}`
+        throw new Error(`Output validation failed: ${errors.map((e) => `${e.instancePath || '(root)'}: ${e.message}`).join('; ')}`)
       }
       state = { ok: true, value: output }
       return 'Step completed.'

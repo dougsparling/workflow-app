@@ -40,7 +40,7 @@ export const anthropicApiKey = {
 }
 
 const makeClaudeHaiku = async () => {
-  let apiKey = await anthropicApiKey.get() ?? undefined
+  const apiKey = await anthropicApiKey.get() ?? undefined
   return new ChatAnthropic({
     model: 'claude-haiku-4-5-20251001',
     apiKey,
@@ -49,7 +49,7 @@ const makeClaudeHaiku = async () => {
 }
 
 const makeClaudeSonnet = async () => {
-  let apiKey = await anthropicApiKey.get() ?? undefined
+  const apiKey = await anthropicApiKey.get() ?? undefined
   return new ChatAnthropic({
     model: 'claude-sonnet-4-6',
     apiKey,
@@ -58,7 +58,7 @@ const makeClaudeSonnet = async () => {
 }
 
 const makeDeepSeekFlash = async () => {
-  let apiKey = await deepseekApiKey.get() ?? undefined
+  const apiKey = await deepseekApiKey.get() ?? undefined
   return new ChatDeepSeek({
     model: 'deepseek-v4-flash',
     apiKey,
@@ -67,7 +67,7 @@ const makeDeepSeekFlash = async () => {
 }
 
 const makeDeepSeekPro = async () => {
-  let apiKey = await deepseekApiKey.get() ?? undefined
+  const apiKey = await deepseekApiKey.get() ?? undefined
   return new ChatDeepSeek({
     model: 'deepseek-v4-pro',
     apiKey,

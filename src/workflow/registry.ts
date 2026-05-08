@@ -37,7 +37,7 @@ function makeResearcherWorkflow({ reasoning, chat }: ModelTier) {
           model: chat,
           tools: [],
           systemPrompt:
-            'Given the input category, come up with a specific topic within that category that would make for interesting research.',
+            'Given the input category, come up with a general topic within that category that would make for interesting research for a broad audience.',
         },
         queueExecutor,
       ),
@@ -52,7 +52,7 @@ function makeResearcherWorkflow({ reasoning, chat }: ModelTier) {
           model: reasoning,
           tools: [wikipedia],
           systemPrompt:
-            'Using Wikipedia, conduct a few surface-level inquiries into the given topic, then write a report (500-1000 words) with an emphasis on surprising or unusual facts. Add citation anchors as <#> and include urls in the citation list.',
+            'Using Wikipedia, conduct inquiries into the specifics of the given topic, then write a three-paragraph report of your findings. Add citation anchors as <#> and include urls in the citation list.',
         },
         queueExecutor,
       ),
@@ -67,7 +67,7 @@ function makeResearcherWorkflow({ reasoning, chat }: ModelTier) {
           model: chat,
           tools: [],
           systemPrompt:
-            'Given the input, produce a well-formatted markdown document with a descriptive title. The output must contain "title" (a short plain-text title for the document) and "markdown" (the full content as markdown, including the title as a level-1 heading).',
+            'Given the input, produce a well-formatted markdown document with a descriptive title and a list of citations. The output must contain "title" (a short plain-text title for the document) and "markdown" (the full content as markdown, including the title as a level-1 heading). Citation markers `<#>` should be replaced with hyperlinks to the citation.',
         },
         queueExecutor,
       ),
@@ -164,7 +164,7 @@ export const workflowRegistry: WorkflowEntry[] = [
   {
     id: 'researcher-deepseek',
     label: 'Researcher — DeepSeek',
-    workflow: makeResearcherWorkflow({ reasoning: deepseekPro, chat: deepseekFlash }),
+    workflow: makeResearcherWorkflow({ reasoning: deepseekFlash, chat: deepseekFlash }),
   },
   {
     id: 'researcher-qwen',

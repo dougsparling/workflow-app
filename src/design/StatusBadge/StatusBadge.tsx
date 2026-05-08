@@ -1,5 +1,3 @@
-// components/StatusBadge/StatusBadge.tsx
-import React from 'react'
 import { View, Text } from 'react-native'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'

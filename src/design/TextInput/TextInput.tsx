@@ -1,5 +1,3 @@
-// components/TextInput/TextInput.tsx
-import React from 'react'
 import {
   View,
   Text,
@@ -9,7 +7,7 @@ import type { TextInputProps as RNTextInputProps } from 'react-native'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
 
-export type TextInputProps = {
+type Props = {
   label?: string
   hint?: string
   error?: string
@@ -29,13 +27,13 @@ export type TextInputProps = {
   | 'testID'
 >
 
-export function TextInput({
+export default function TextInput({
   label,
   hint,
   error,
   disabled = false,
   ...inputProps
-}: TextInputProps) {
+}: Props) {
   const styles = useThemedStyles(themedStyles)
   const { tokens } = useTheme()
   const hasError = Boolean(error)
