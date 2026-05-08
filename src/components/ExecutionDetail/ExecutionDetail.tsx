@@ -9,9 +9,10 @@ import { useExecutionStore } from '@store/executionQueue'
 
 interface Props {
   executionId: string
+  hideHeader?: boolean
 }
 
-export default function ExecutionDetail({ executionId }: Props) {
+export default function ExecutionDetail({ executionId, hideHeader = false }: Props) {
   const job = useExecutionStore((s) => s.jobs.find((j) => j.id === executionId))
   const { tokens } = useTheme()
   const styles = useThemedStyles(themedStyles)
@@ -32,15 +33,17 @@ export default function ExecutionDetail({ executionId }: Props) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text style={styles.agentName}>{job.def.name}</Text>
-          <Text style={styles.prompt} numberOfLines={2}>
-            {job.prompt}
-          </Text>
+      {!hideHeader && (
+        <View style={styles.header}>
+          <View style={styles.headerText}>
+            <Text style={styles.agentName}>{job.def.name}</Text>
+            <Text style={styles.prompt} numberOfLines={2}>
+              {job.prompt}
+            </Text>
+          </View>
+          <StatusBadge status={job.status} />
         </View>
-        <StatusBadge status={job.status} />
-      </View>
+      )}
 
       <FlatList
         ref={listRef}

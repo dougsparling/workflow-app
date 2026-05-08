@@ -1,14 +1,13 @@
 import { create } from 'zustand'
 import type { TSchema } from 'typebox'
-import type { ExecutionStatus } from '@design/StatusBadge/StatusBadge'
 import type { Workflow, WorkflowEvent } from '@workflow/workflow'
 import { createSerialQueue, type BaseJob, type JobStatus, type SerialQueueSlice } from './serialQueue'
 
-export type WorkflowStepState = {
-  name: string
-  status: ExecutionStatus
-  error?: string
-}
+export type WorkflowStepState =
+  | { name: string; status: 'pending' }
+  | { name: string; status: 'running';  inputData: unknown; executionId?: string }
+  | { name: string; status: 'complete'; inputData: unknown; outputData: unknown; executionId?: string }
+  | { name: string; status: 'failed';   inputData: unknown; error: string; executionId?: string }
 
 export type WorkflowJob = BaseJob & {
   name: string
@@ -37,7 +36,7 @@ export const useWorkflowStore = create<WorkflowQueueStore>((set, get) => {
       name,
       wf,
       input,
-      steps: wf.steps.map(step => ({ name: step.name, status: 'pending' as ExecutionStatus })),
+      steps: wf.steps.map(step => ({ name: step.name, status: 'pending' as const })),
     }),
     _onEvent: (id, event) => {
       switch (event.type) {
@@ -45,26 +44,38 @@ export const useWorkflowStore = create<WorkflowQueueStore>((set, get) => {
           get()._updateJob(id, j => ({
             ...j,
             steps: j.steps.map((s, i) =>
-              i === event.stepIndex ? { ...s, status: 'running' as ExecutionStatus } : s
+              i === event.stepIndex
+                ? { name: s.name, status: 'running' as const, inputData: event.input }
+                : s
+            ),
+          }))
+          break
+        case 'step:execution-created':
+          get()._updateJob(id, j => ({
+            ...j,
+            steps: j.steps.map((s, i) =>
+              i === event.stepIndex && s.status !== 'pending'
+                ? { ...s, executionId: event.executionId }
+                : s
             ),
           }))
           break
         case 'step:complete':
           get()._updateJob(id, j => ({
             ...j,
-            steps: j.steps.map((s, i) =>
-              i === event.stepIndex ? { ...s, status: 'complete' as ExecutionStatus } : s
-            ),
+            steps: j.steps.map((s, i) => {
+              if (i !== event.stepIndex || s.status === 'pending') return s
+              return { name: s.name, status: 'complete' as const, inputData: s.inputData, outputData: event.output, executionId: s.executionId }
+            }),
           }))
           break
         case 'step:error':
           get()._updateJob(id, j => ({
             ...j,
-            steps: j.steps.map((s, i) =>
-              i === event.stepIndex
-                ? { ...s, status: 'failed' as ExecutionStatus, error: event.error.message }
-                : s
-            ),
+            steps: j.steps.map((s, i) => {
+              if (i !== event.stepIndex || s.status === 'pending') return s
+              return { name: s.name, status: 'failed' as const, inputData: s.inputData, error: event.error.message, executionId: s.executionId }
+            }),
           }))
           break
         case 'done':

@@ -8,33 +8,44 @@ import { type Tool } from './tools'
 
 type AgentStepState = { ok: true; value: unknown } | { ok: false; error: Error }
 
+export type AgentMeta = { _executionMeta: true; executionId: string }
+
 /**
  * Pluggable execution context for the agent run during the step.
+ * Executors may yield an AgentMeta value to report the executionId before messages.
  */
 export type AgentExecutor = (
   def: AgentDef,
   prompt: string,
-) => AsyncGenerator<BaseMessage>
+) => AsyncGenerator<BaseMessage | AgentMeta>
 
 /**
  * Returns a step definition backed by an agent.
- * 
+ *
  * @param agentDef The agent's definition.
  * @param executor Allows interception of agent runs. Can be used for agent observability + serialization, or if not set, just runs async immediately.
+ * @param onExecutionCreated Called when the executor yields an AgentMeta with an executionId.
  * @returns Step definition with erased result type (validation done at runtime)
  */
-export function agentStep<T = unknown>(agentDef: AgentDef, executor: AgentExecutor = runAgent) {
-  return async (input: unknown, inputSchema: TSchema, outputSchema: TSchema): Promise<T> => {
+export function agentStep<T = unknown>(
+  agentDef: AgentDef,
+  executor: AgentExecutor = runAgent,
+) {
+  const fn = async (input: unknown, inputSchema: TSchema, outputSchema: TSchema, onExecutionCreated?: (id: string) => void): Promise<T> => {
     const { tools, getAgentStepState } = makeStepTools(input, outputSchema)
     const systemPrompt = extendPromptForWorkflow(agentDef.systemPrompt, inputSchema, outputSchema)
 
     let agentError: Error | undefined
     try {
-      for await (const _msg of executor(
+      for await (const item of executor(
         { ...agentDef, systemPrompt, tools: [...agentDef.tools, ...tools] },
         'Begin.',
       )) {
-        // discard — agentStep only cares about the step state via complete_step / fail_step
+        if ('_executionMeta' in item) {
+          onExecutionCreated?.(item.executionId)
+          continue
+        }
+        // discard messages — agentStep only cares about step state via complete_step / fail_step
       }
     } catch (e) {
       agentError = e instanceof Error ? e : new Error(String(e))
@@ -45,6 +56,8 @@ export function agentStep<T = unknown>(agentDef: AgentDef, executor: AgentExecut
     if (state && !state.ok) throw state.error
     throw agentError ?? new Error('Agent finished without calling complete_step or fail_step')
   }
+  ;(fn as { _modelLabel?: string })._modelLabel = agentDef.model.label
+  return fn
 }
 
 /**

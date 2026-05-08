@@ -29,7 +29,7 @@ export default function WorkflowDetail({ workflowId }: Props) {
             title={item.name}
             status={item.status}
             icon={stepIcon(item.status)}
-            subtitles={item.error ? [item.error] : undefined}
+            subtitles={item.status === 'failed' ? [item.error] : undefined}
           />
         )}
         contentContainerStyle={styles.list}

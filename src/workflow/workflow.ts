@@ -2,19 +2,21 @@ import { type TSchema, type Static } from 'typebox'
 import { Check, Errors } from 'typebox/value'
 
 export type WorkflowEvent =
-  | { type: 'step:start';    stepIndex: number; stepName: string }
-  | { type: 'step:complete'; stepIndex: number; stepName: string }
-  | { type: 'step:error';    stepIndex: number; stepName: string; error: Error }
+  | { type: 'step:start';             stepIndex: number; stepName: string; input: unknown }
+  | { type: 'step:complete';          stepIndex: number; stepName: string; output: unknown }
+  | { type: 'step:error';             stepIndex: number; stepName: string; error: Error }
+  | { type: 'step:execution-created'; stepIndex: number; executionId: string }
   | { type: 'done' }
-  | { type: 'error';         error: Error }
+  | { type: 'error';                  error: Error }
 
 export type WorkflowCallback = (event: WorkflowEvent) => void
 
 export type Step<In extends TSchema, Out extends TSchema> = {
   name: string
+  model?: string
   input: In
   output: Out
-  execute: (input: Static<In>, inputSchema: TSchema, outputSchema: TSchema) => Promise<Static<Out>>
+  execute: (input: Static<In>, inputSchema: TSchema, outputSchema: TSchema, onExecutionCreated?: (id: string) => void) => Promise<Static<Out>>
 }
 
 export type Workflow<In extends TSchema, Out extends TSchema> = {
@@ -26,7 +28,7 @@ export type WorkflowBuilder<In extends TSchema, Out extends TSchema> = {
   step: <Next extends TSchema>(
     name: string,
     schema: Next,
-    fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema) => Static<Next> | Promise<Static<Next>>
+    fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema, onExecutionCreated?: (id: string) => void) => Static<Next> | Promise<Static<Next>>
   ) => WorkflowBuilder<In, Next>
   create: () => Workflow<In, Out>
 }
@@ -42,12 +44,17 @@ function validate(schema: TSchema, value: unknown, stepName: string, direction: 
 async function runSteps(steps: Step<TSchema, TSchema>[], input: unknown, callback: WorkflowCallback): Promise<unknown> {
   let result: unknown = input
   for (const [i, step] of steps.entries()) {
-    callback({ type: 'step:start', stepIndex: i, stepName: step.name })
+    callback({ type: 'step:start', stepIndex: i, stepName: step.name, input: result })
     validate(step.input, result, step.name, 'input')
     try {
-      result = await step.execute(result as Static<TSchema>, step.input, step.output)
+      result = await step.execute(
+        result as Static<TSchema>,
+        step.input,
+        step.output,
+        (executionId) => callback({ type: 'step:execution-created', stepIndex: i, executionId }),
+      )
       validate(step.output, result, step.name, 'output')
-      callback({ type: 'step:complete', stepIndex: i, stepName: step.name })
+      callback({ type: 'step:complete', stepIndex: i, stepName: step.name, output: result })
     } catch (e) {
       const error = e instanceof Error ? e : new Error(String(e))
       callback({ type: 'step:error', stepIndex: i, stepName: step.name, error })
@@ -67,14 +74,15 @@ function makeBuilder<In extends TSchema, Out extends TSchema>(
     step<Next extends TSchema>(
       name: string,
       schema: Next,
-      fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema) => Static<Next> | Promise<Static<Next>>
+      fn: (input: Static<Out>, inputSchema: TSchema, outputSchema: TSchema, onExecutionCreated?: (id: string) => void) => Static<Next> | Promise<Static<Next>>
     ): WorkflowBuilder<In, Next> {
       const inputSchema = steps.length > 0 ? steps[steps.length - 1].output : initialSchema
       return makeBuilder<In, Next>(initialSchema, [...steps, {
         name,
+        model: (fn as { _modelLabel?: string })._modelLabel,
         input: inputSchema,
         output: schema,
-        execute: (input, inputSchema, outputSchema) => Promise.resolve(fn(input as Static<Out>, inputSchema, outputSchema)),
+        execute: (input, inputSchema, outputSchema, onExecutionCreated) => Promise.resolve(fn(input as Static<Out>, inputSchema, outputSchema, onExecutionCreated)),
       }])
     },
     create(): Workflow<In, Out> {

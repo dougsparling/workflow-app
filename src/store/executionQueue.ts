@@ -48,11 +48,11 @@ export const useExecutionStore = create<ExecutionQueueStore>((set, get) => {
   }
 })
 
-export function enqueueAsync(def: AgentDef, prompt: string): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const id = useExecutionStore.getState().enqueueAgent(def, prompt)
+export function enqueueAsync(def: AgentDef, prompt: string): { jobId: string; promise: Promise<void> } {
+  const jobId = useExecutionStore.getState().enqueueAgent(def, prompt)
+  const promise = new Promise<void>((resolve, reject) => {
     const unsub = useExecutionStore.subscribe((state) => {
-      const job = state.jobs.find(j => j.id === id)
+      const job = state.jobs.find(j => j.id === jobId)
       if (!job) return
       if (job.status === 'complete' || job.status === 'aborted') {
         unsub()
@@ -64,6 +64,7 @@ export function enqueueAsync(def: AgentDef, prompt: string): Promise<void> {
       }
     })
   })
+  return { jobId, promise }
 }
 
 export function messageLevel(msg: BaseMessage): 'INFO' | 'DEBUG' | null {
