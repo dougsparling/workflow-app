@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native'
 import { useEffect, useState } from 'react'
-import { deepseekApiKey } from '@workflow/models'
+import { deepseekApiKey, anthropicApiKey } from '@workflow/models'
 import { createThemedStyles, useTheme, useThemedStyles } from '@design/theme'
 import type { ThemePreference } from '@design/theme'
 import { TextInput } from '@design/TextInput/TextInput'
@@ -8,7 +8,8 @@ import Background from '@design/Background/Background'
 import SectionLabel from '@design/SectionLabel/SectionLabel'
 import MultiToggle from '@design/MultiToggle/MultiToggle'
 
-const KEY_REGEX = /^sk-[a-f0-9]{32}$/
+const DEEPSEEK_KEY_REGEX = /^sk-[a-f0-9]{32}$/
+const ANTHROPIC_KEY_REGEX = /^sk-ant-/
 
 const THEME_OPTIONS: { label: string; value: ThemePreference }[] = [
   { label: 'Light', value: 'light' },
@@ -16,23 +17,18 @@ const THEME_OPTIONS: { label: string; value: ThemePreference }[] = [
   { label: 'System', value: 'system' },
 ]
 
-export default function Settings() {
-  const [apiKey, setApiKey] = useState(null as string | null)
-  const styles = useThemedStyles(themedStyles)
-  const { themePreference, setThemePreference } = useTheme()
-
-  const trimmed = apiKey?.trim() ?? ''
+function useApiKeyField(
+  storageKey: { get: () => Promise<string | null>; set: (k: string) => Promise<void> },
+  regex: RegExp,
+) {
+  const [value, setValue] = useState(null as string | null)
+  const trimmed = value?.trim() ?? ''
   const validity: 'empty' | 'invalid' | 'valid' =
-    !trimmed ? 'empty' : KEY_REGEX.test(trimmed) ? 'valid' : 'invalid'
+    !trimmed ? 'empty' : regex.test(trimmed) ? 'valid' : 'invalid'
 
+  useEffect(() => { storageKey.get().then(setValue) }, [])
   useEffect(() => {
-    deepseekApiKey.get().then(setApiKey)
-  }, [])
-
-  useEffect(() => {
-    if (validity === 'valid') {
-      deepseekApiKey.set(trimmed)
-    }
+    if (validity === 'valid') storageKey.set(trimmed)
   }, [validity, trimmed])
 
   const statusLabel =
@@ -40,22 +36,51 @@ export default function Settings() {
     validity === 'invalid' ? 'INVALID' :
     'SAVED'
 
+  return { value, setValue, validity, statusLabel }
+}
+
+export default function Settings() {
+  const styles = useThemedStyles(themedStyles)
+  const { themePreference, setThemePreference } = useTheme()
+
+  const deepseek = useApiKeyField(deepseekApiKey, DEEPSEEK_KEY_REGEX)
+  const anthropic = useApiKeyField(anthropicApiKey, ANTHROPIC_KEY_REGEX)
+
   return (
     <Background>
       <View style={styles.section}>
         <SectionLabel>DeepSeek API Key</SectionLabel>
         <View style={styles.inputGroup}>
           <TextInput
-            value={apiKey ?? ''}
-            onChangeText={setApiKey}
+            value={deepseek.value ?? ''}
+            onChangeText={deepseek.setValue}
             placeholder="sk-..."
             secureTextEntry
             autoCapitalize="none"
             autoCorrect={false}
           />
-          {statusLabel && (
-            <Text style={[styles.status, validity === 'invalid' ? styles.statusError : styles.statusOk]}>
-              {statusLabel}
+          {deepseek.statusLabel && (
+            <Text style={[styles.status, deepseek.validity === 'invalid' ? styles.statusError : styles.statusOk]}>
+              {deepseek.statusLabel}
+            </Text>
+          )}
+        </View>
+      </View>
+      <View style={styles.divider} />
+      <View style={styles.section}>
+        <SectionLabel>Anthropic API Key</SectionLabel>
+        <View style={styles.inputGroup}>
+          <TextInput
+            value={anthropic.value ?? ''}
+            onChangeText={anthropic.setValue}
+            placeholder="sk-ant-..."
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {anthropic.statusLabel && (
+            <Text style={[styles.status, anthropic.validity === 'invalid' ? styles.statusError : styles.statusOk]}>
+              {anthropic.statusLabel}
             </Text>
           )}
         </View>

@@ -6,7 +6,7 @@ import { workflow } from './workflow'
 import type { Workflow } from './workflow'
 import { agentStep, type AgentExecutor, type AgentMeta } from './agentstep'
 import { outboxStep, OutboxOutputSchema } from './outboxStep'
-import { deepseekPro, deepseekFlash, qwen } from './models'
+import { deepseekPro, deepseekFlash, qwen, claudeHaiku, claudeSonnet, type Model } from './models'
 import { wikipedia } from './tools'
 
 const ResearchSchema = Type.Object({
@@ -120,53 +120,57 @@ const PlanOutputSchema = Type.Object({
   ),
 })
 
-const itineraryWorkflow = workflow(ItineraryInputSchema)
-  .step(
-    'scout',
-    ScoutOutputSchema,
-    agentStep(
-      {
-        name: 'Scout',
-        model: deepseekPro,
-        tools: [wikipedia],
-        systemPrompt:
-          'You are a travel expert. Use Wikipedia to research the given destination (country or region). Then select exactly the number of cities or areas specified in `days` — one per day — that together make a well-paced trip (vary size, character, and geography). Output them as the `cities` array.',
-      },
-      queueExecutor,
-    ),
-    { model: deepseekPro.label },
-  )
-  .step(
-    'plan',
-    PlanOutputSchema,
-    agentStep(
-      {
-        name: 'Planner',
-        model: deepseekFlash,
-        tools: [wikipedia],
-        systemPrompt:
-          'You are a travel planner. For each city in the `cities` array, call Wikipedia to research it (top attractions, food, local tips, logistics). Then write a one-day itinerary for that city covering morning, afternoon, and evening. Produce one `plans` entry per city with `city` and `itinerary` fields.',
-      },
-      queueExecutor,
-    ),
-    { model: deepseekFlash.label },
-  )
-  .step(
-    'format',
-    OutboxOutputSchema,
-    outboxStep(
-      {
-        name: 'Formatter',
-        model: qwen,
-        tools: [],
-        systemPrompt:
-          'Format the travel plan as a polished markdown guide. The title should name the destination and number of days (e.g. "5 Days in Japan"). Write a short intro paragraph, then a section per day headed "Day N — City" with the itinerary as bullet points.',
-      },
-      queueExecutor,
-    ),
-    { model: qwen.label },
-  )
-  .create()
+type ModelTier = { reasoning: Model; chat: Model }
+
+function makeItineraryWorkflow({ reasoning, chat }: ModelTier) {
+  return workflow(ItineraryInputSchema)
+    .step(
+      'scout',
+      ScoutOutputSchema,
+      agentStep(
+        {
+          name: 'Scout',
+          model: reasoning,
+          tools: [wikipedia],
+          systemPrompt:
+            'You are a travel expert. Use Wikipedia to research the given destination (country or region). Then select exactly the number of cities or areas specified in `days` — one per day — that together make a well-paced trip (vary size, character, and geography). Output them as the `cities` array.',
+        },
+        queueExecutor,
+      ),
+      { model: reasoning.label },
+    )
+    .step(
+      'plan',
+      PlanOutputSchema,
+      agentStep(
+        {
+          name: 'Planner',
+          model: chat,
+          tools: [wikipedia],
+          systemPrompt:
+            'You are a travel planner. For each city in the `cities` array, call Wikipedia to research it (top attractions, food, local tips, logistics). Then write a one-day itinerary for that city covering morning, afternoon, and evening. Produce one `plans` entry per city with `city` and `itinerary` fields.',
+        },
+        queueExecutor,
+      ),
+      { model: chat.label },
+    )
+    .step(
+      'format',
+      OutboxOutputSchema,
+      outboxStep(
+        {
+          name: 'Formatter',
+          model: chat,
+          tools: [],
+          systemPrompt:
+            'Format the travel plan as a polished markdown guide. The title should name the destination and number of days (e.g. "5 Days in Japan"). Write a short intro paragraph, then a section per day headed "Day N — City" with the itinerary as bullet points.',
+        },
+        queueExecutor,
+      ),
+      { model: chat.label },
+    )
+    .create()
+}
 
 export type WorkflowEntry = {
   id: string
@@ -181,8 +185,18 @@ export const workflowRegistry: WorkflowEntry[] = [
     workflow: researcherWorkflow,
   },
   {
-    id: 'itinerary',
-    label: 'Travel Itinerary',
-    workflow: itineraryWorkflow,
+    id: 'itinerary-qwen',
+    label: `Itinerary — Qwen`,
+    workflow: makeItineraryWorkflow({ reasoning: qwen, chat: qwen }),
+  },
+  {
+    id: 'itinerary-deepseek',
+    label: `Itinerary — DeepSeek`,
+    workflow: makeItineraryWorkflow({ reasoning: deepseekPro, chat: deepseekFlash }),
+  },
+  {
+    id: 'itinerary-claude',
+    label: `Itinerary — Claude`,
+    workflow: makeItineraryWorkflow({ reasoning: claudeSonnet, chat: claudeHaiku }),
   },
 ]

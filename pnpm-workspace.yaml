@@ -1,4 +1,4 @@
 patchedDependencies:
-  '@langchain/core@1.1.41': patches/@langchain__core@1.1.41.patch
+  '@langchain/core@1.1.45': patches/@langchain__core@1.1.45.patch
   '@langchain/openai@1.4.4': patches/@langchain__openai@1.4.4.patch
   '@langchain/openai@1.4.5': patches/@langchain__openai@1.4.5.patch

@@ -1,10 +1,12 @@
 import { Platform } from 'react-native'
 import { BaseChatModel } from "@langchain/core/language_models/chat_models"
+import { ChatAnthropic } from "@langchain/anthropic"
 import { ChatDeepSeek } from "@langchain/deepseek"
 import { ChatOpenAI } from "@langchain/openai"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const DEEPSEEK_KEY_STORAGE = 'deepseek_api_key'
+const ANTHROPIC_KEY_STORAGE = 'anthropic_api_key'
 
 const localBaseUrl = Platform.select({
   android: 'http://10.0.2.2:8080/v1',
@@ -32,6 +34,29 @@ export const deepseekApiKey = {
   get: async () => await AsyncStorage.getItem(DEEPSEEK_KEY_STORAGE)
 }
 
+export const anthropicApiKey = {
+  set: async (key: string) => AsyncStorage.setItem(ANTHROPIC_KEY_STORAGE, key),
+  get: async () => await AsyncStorage.getItem(ANTHROPIC_KEY_STORAGE)
+}
+
+const makeClaudeHaiku = async () => {
+  let apiKey = await anthropicApiKey.get() ?? undefined
+  return new ChatAnthropic({
+    model: 'claude-haiku-4-5-20251001',
+    apiKey,
+    clientOptions: { timeout: 30000 },
+  })
+}
+
+const makeClaudeSonnet = async () => {
+  let apiKey = await anthropicApiKey.get() ?? undefined
+  return new ChatAnthropic({
+    model: 'claude-sonnet-4-6',
+    apiKey,
+    clientOptions: { timeout: 60000 },
+  })
+}
+
 const makeDeepSeekFlash = async () => {
   let apiKey = await deepseekApiKey.get() ?? undefined
   return new ChatDeepSeek({
@@ -52,7 +77,9 @@ const makeDeepSeekPro = async () => {
 
 const qwen = { label: "Qwen (Local)", factory: makeQwen }
 const deepseekFlash = { label: "DeepSeek (Flash)", factory: makeDeepSeekFlash }
-const deepseekPro = { label: "DeepSeek (Flash)", factory: makeDeepSeekPro }
-const models: Model[] = [qwen, deepseekFlash, deepseekPro]
+const deepseekPro = { label: "DeepSeek (Pro)", factory: makeDeepSeekPro }
+const claudeHaiku = { label: "Claude Haiku", factory: makeClaudeHaiku }
+const claudeSonnet = { label: "Claude Sonnet", factory: makeClaudeSonnet }
+const models: Model[] = [qwen, deepseekFlash, deepseekPro, claudeHaiku, claudeSonnet]
 
-export { models as default, qwen, deepseekFlash, deepseekPro }
+export { models as default, qwen, deepseekFlash, deepseekPro, claudeHaiku, claudeSonnet }
