@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Pressable, useWindowDimensions, View, Text } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router } from 'expo-router'
@@ -22,6 +22,27 @@ export default function WorkflowScreen() {
   const styles = useThemedStyles(themedStyles)
   const carouselRef = useRef<ICarouselInstance>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const prevRef = useRef<{ index: number; status: string }>({ index: -1, status: '' })
+
+  const currentStatus = job?.steps[activeIndex]?.status ?? ''
+
+  useEffect(() => {
+    if (!job) return
+    const prev = prevRef.current
+    if (prev.index !== activeIndex) {
+      prevRef.current = { index: activeIndex, status: currentStatus }
+      return
+    }
+    if (prev.status === 'running' && currentStatus === 'complete') {
+      const nextIndex = activeIndex + 1
+      if (nextIndex < job.steps.length) {
+        setTimeout(() => {
+          carouselRef.current?.scrollTo({ index: nextIndex, animated: true })
+        }, 600)
+      }
+    }
+    prevRef.current = { index: activeIndex, status: currentStatus }
+  }, [currentStatus, activeIndex])
 
   if (!job) return null
 
