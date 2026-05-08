@@ -9,7 +9,7 @@ export class ToolRegistry {
   }
 
   async call(name: string, id: string, args: Record<string, unknown>): Promise<ToolMessage> {
-    const base = { tool_call_id: id }
+    const base = { tool_call_id: id, name, additional_kwargs: { args } }
     const handler = this.toolsByName[name]
     if (!handler) {
       return new ToolMessage({ ...base, content: `Unknown tool: ${name}` })

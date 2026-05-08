@@ -10,9 +10,10 @@ import { useExecutionStore } from '@store/executionQueue'
 interface Props {
   executionId: string
   hideHeader?: boolean
+  onPressMessage?: (msg: BaseMessage) => void
 }
 
-export default function ExecutionDetail({ executionId, hideHeader = false }: Props) {
+export default function ExecutionDetail({ executionId, hideHeader = false, onPressMessage }: Props) {
   const job = useExecutionStore((s) => s.jobs.find((j) => j.id === executionId))
   const { tokens } = useTheme()
   const styles = useThemedStyles(themedStyles)
@@ -55,6 +56,7 @@ export default function ExecutionDetail({ executionId, hideHeader = false }: Pro
             status="complete"
             icon={messageIcon(item.msg)}
             iconColor={messageIconColor(item.msg, tokens)}
+            onPress={onPressMessage ? () => onPressMessage(item.msg) : undefined}
           />
         )}
         contentContainerStyle={styles.list}
