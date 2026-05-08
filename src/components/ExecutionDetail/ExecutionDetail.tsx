@@ -7,7 +7,7 @@ import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import { useExecutionStore } from '@store/executionQueue'
 
-interface Props {
+type Props = {
   executionId: string
   hideHeader?: boolean
   onPressMessage?: (msg: BaseMessage) => void

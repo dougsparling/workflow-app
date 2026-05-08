@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@jest/globals"
 import { Type } from "typebox"
-import { workflow, type Workflow, type WorkflowBuilder } from "@workflow/workflow"
+import { workflow } from "@workflow/workflow"
 
 describe("workflow", () => {
   it("creates an identity workflow", async () => {

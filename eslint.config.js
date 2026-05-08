@@ -19,7 +19,7 @@ module.exports = defineConfig([
       'import-x/no-internal-modules': [
         'error',
         {
-          allow: ['app/**', 'assets/**', '@expo/**', '@langchain/**', 'react-native/**'],
+          allow: ['app/**', 'assets/**', '@expo/**', '@langchain/**', 'react-native/**', 'typebox/**'],
         },
       ],
     },

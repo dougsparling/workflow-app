@@ -7,7 +7,7 @@ import type { ThemeTokens } from '../theme'
 
 type FeatherName = ComponentProps<typeof Feather>['name']
 
-interface Props {
+type Props = {
   label: string
   icon?: FeatherName
   onPress?: () => void

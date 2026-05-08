@@ -23,6 +23,7 @@ export default function WorkflowScreen() {
   const carouselRef = useRef<ICarouselInstance>(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
   const prevRef = useRef<{ index: number; status: string }>({ index: -1, status: '' })
 
   const currentStatus = job?.steps[activeIndex]?.status ?? ''
@@ -43,7 +44,7 @@ export default function WorkflowScreen() {
       }
     }
     prevRef.current = { index: activeIndex, status: currentStatus }
-  }, [currentStatus, activeIndex, detailOpen])
+  }, [currentStatus, activeIndex, detailOpen, job])
 
   if (!job) return null
 
@@ -89,6 +90,8 @@ export default function WorkflowScreen() {
           style={{ width: screenWidth }}
           loop={false}
           onSnapToItem={setActiveIndex}
+          onScrollStart={() => setIsScrolling(true)}
+          onScrollEnd={() => setIsScrolling(false)}
           renderItem={({ index }) => {
             const step = job.steps[index]
             const stepDef = job.wf.steps[index]
@@ -98,6 +101,7 @@ export default function WorkflowScreen() {
                 step={step}
                 stepDef={stepDef as Step<TSchema, TSchema>}
                 onModalChange={setDetailOpen}
+                isScrolling={isScrolling}
               />
             )
           }}

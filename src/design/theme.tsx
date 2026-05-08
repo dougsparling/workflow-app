@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 import { StyleSheet, useColorScheme } from 'react-native'
 
 export type Theme = 'light' | 'dark'
@@ -214,7 +214,7 @@ const lightColors = {
 // `as const` object widens to unique literal types that aren't mutually
 // assignable. ColorTokens names every key with `string` so either theme
 // satisfies it, while still providing autocomplete for consumers.
-export interface ColorTokens {
+export type ColorTokens = {
   bgBase: string
   bgSurface: string
   bgElevated: string

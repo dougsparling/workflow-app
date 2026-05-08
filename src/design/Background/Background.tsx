@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import { createThemedStyles, useThemedStyles } from '../theme'
 
-interface Props {
+type Props = {
   children: ReactNode
 }
 

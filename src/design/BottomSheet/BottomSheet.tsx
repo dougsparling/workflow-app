@@ -3,7 +3,7 @@ import { Animated, Modal, Pressable, View } from 'react-native'
 import { createThemedStyles, useThemedStyles } from '../theme'
 import type { ThemeTokens } from '../theme'
 
-interface Props {
+type Props = {
   visible: boolean
   onDismiss: () => void
   children: ReactNode

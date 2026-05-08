@@ -2,9 +2,20 @@
 
 This is a **React Native (Expo) mobile app** called "workflow-app" that demonstrates **LangChain.js agentic workflows** running on a mobile device.
 
+## Setup
+
+After cloning, activate the shared git hooks:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+This enables the pre-commit guardrails (lint + typecheck + test).
+
 ## General Agent Guidance
 
 - Do not delete comments when making adjacent refactoring unless the comment's validity is impacted by the change, in which case it should be rewritten, not removed.
+- Use `pnpm` instead of npm/npx
 
 ## Tech Stack
 

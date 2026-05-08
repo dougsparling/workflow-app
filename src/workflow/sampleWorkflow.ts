@@ -71,7 +71,7 @@ export const sampleWorkflow = workflow(Type.Object({ topic: Type.String() }))
         model: deepseek,
         tools: [wikipedia],
         systemPrompt:
-          'Use Wikipedia to research the given topic, then write a report with an emphasis on facts and uncommon knowledge. Add citation anchors as <#> and include them in the citation list.',
+          'Use Wikipedia (at most five tool calls) to conduct brief research the given topic, then write a report (500-1000 words) with an emphasis on surprising or uncommon discoveries. Add citation anchors as <#> and include urls in the citation list.',
       },
       queueExecutor,
     ),

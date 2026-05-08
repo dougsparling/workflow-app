@@ -5,21 +5,22 @@ import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages'
 import type { BaseMessage } from '@langchain/core/messages'
 import StatusBadge from '@design/StatusBadge/StatusBadge'
 import BottomSheet from '@design/BottomSheet/BottomSheet'
-import { createThemedStyles, useThemedStyles, useTheme } from '@design/theme'
+import { createThemedStyles, useThemedStyles } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import RecordList from '@components/RecordList/RecordList'
 import ExecutionDetail from '@components/ExecutionDetail/ExecutionDetail'
 import type { WorkflowStepState } from '@store/workflowQueue'
 import type { Step } from '@workflow/workflow'
 
-interface Props {
+type Props = {
   index: number
   step: WorkflowStepState
   stepDef: Step<TSchema, TSchema>
   onModalChange?: (open: boolean) => void
+  isScrolling?: boolean
 }
 
-export default function StepSlide({ index, step, stepDef, onModalChange }: Props) {
+export default function StepSlide({ index, step, stepDef, onModalChange, isScrolling }: Props) {
   const styles = useThemedStyles(themedStyles)
   const [topHeight, setTopHeight] = useState(0)
   const [bottomHeight, setBottomHeight] = useState(0)
@@ -53,7 +54,7 @@ export default function StepSlide({ index, step, stepDef, onModalChange }: Props
           <ExecutionDetail
             executionId={executionId}
             hideHeader
-            onPressMessage={msg => { setSelectedMsg(msg); onModalChange?.(true) }}
+            onPressMessage={isScrolling ? undefined : msg => { setSelectedMsg(msg); onModalChange?.(true) }}
           />
         ) : (
           <View style={styles.pendingPlaceholder}>
@@ -86,7 +87,6 @@ function MessageContent({ message, modelName }: {
   message: BaseMessage
   modelName?: string
 }) {
-  const { tokens } = useTheme()
   const styles = useThemedStyles(themedStyles)
 
   if (HumanMessage.isInstance(message)) {

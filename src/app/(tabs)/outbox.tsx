@@ -1,4 +1,4 @@
-import { FlatList, View, Text } from 'react-native'
+import { FlatList } from 'react-native'
 import { router } from 'expo-router'
 import Background from '@design/Background/Background'
 import EmptyState from '@design/EmptyState/EmptyState'

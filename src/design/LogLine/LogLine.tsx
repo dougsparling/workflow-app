@@ -6,7 +6,7 @@ import type { ThemeTokens } from '../theme'
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG'
 
-interface Props {
+type Props = {
   time: string
   level: LogLevel
   message: string

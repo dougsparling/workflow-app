@@ -9,7 +9,12 @@ import type { TextInputProps as RNTextInputProps } from 'react-native'
 import { createThemedStyles, useThemedStyles, useTheme } from '../theme'
 import type { ThemeTokens } from '../theme'
 
-export interface TextInputProps extends Pick<RNTextInputProps,
+export type TextInputProps = {
+  label?: string
+  hint?: string
+  error?: string
+  disabled?: boolean
+} & Pick<RNTextInputProps,
   | 'value'
   | 'onChangeText'
   | 'placeholder'
@@ -22,12 +27,7 @@ export interface TextInputProps extends Pick<RNTextInputProps,
   | 'onFocus'
   | 'onBlur'
   | 'testID'
-> {
-  label?: string
-  hint?: string
-  error?: string
-  disabled?: boolean
-}
+>
 
 export function TextInput({
   label,

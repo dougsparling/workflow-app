@@ -262,7 +262,7 @@ function mockTool(name = "test_tool", invoke?: AsyncMock) {
   } as unknown as Tool
 }
 
-interface MockAgent {
+type MockAgent = {
   agent: AgentDef
   modelInvoke: AsyncMock
   toolInvoke: AsyncMock

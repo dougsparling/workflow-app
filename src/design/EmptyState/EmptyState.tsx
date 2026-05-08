@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native'
 import { createThemedStyles, useThemedStyles } from '../theme'
 
-interface Props {
+type Props = {
   message: string
 }
 

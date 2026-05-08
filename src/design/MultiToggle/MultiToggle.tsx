@@ -2,12 +2,12 @@ import { Pressable, Text, View } from 'react-native'
 import { createThemedStyles, useThemedStyles } from '../theme'
 import type { ThemeTokens } from '../theme'
 
-interface Option<T extends string> {
+type Option<T extends string> = {
   label: string
   value: T
 }
 
-interface Props<T extends string> {
+type Props<T extends string> = {
   options: Option<T>[]
   value: T
   onChange: (value: T) => void

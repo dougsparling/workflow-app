@@ -1,5 +1,19 @@
 {
   "enabledPlugins": {
     "expo@claude-plugins-official": true
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "out=$(pnpm lint 2>&1); lint_ok=$?; tc_out=$(pnpm typecheck 2>&1); tc_ok=$?; if [ $lint_ok -ne 0 ] || [ $tc_ok -ne 0 ]; then printf '%s\\n%s' \"$out\" \"$tc_out\" | jq -Rs '{\"systemMessage\": (\"⚠️ Guardrails failed — fix before moving on:\\n\" + .)}'; fi; exit 0",
+            "timeout": 60,
+            "statusMessage": "Running guardrails (lint + typecheck)..."
+          }
+        ]
+      }
+    ]
   }
 }

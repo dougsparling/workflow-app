@@ -13,7 +13,7 @@ export type ExecutionStatus =
   | 'stopped'
   | 'aborted'
 
-interface StatusColors {
+type StatusColors = {
   bg: string
   border: string
   text: string
@@ -37,7 +37,7 @@ function getStatusColors(tokens: ThemeTokens, status: ExecutionStatus): StatusCo
   }
 }
 
-interface Props {
+type Props = {
   status: ExecutionStatus
 }
 

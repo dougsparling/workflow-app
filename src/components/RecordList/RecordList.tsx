@@ -4,7 +4,7 @@ import { createThemedStyles, useThemedStyles } from '@design/theme'
 import type { ThemeTokens } from '@design/theme'
 import SectionLabel from '@design/SectionLabel/SectionLabel'
 
-interface Props {
+type Props = {
   label: string
   schema: TSchema
   data?: Record<string, unknown>

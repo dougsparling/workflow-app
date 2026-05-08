@@ -7,7 +7,7 @@ import StatusBadge, { type ExecutionStatus } from '../StatusBadge/StatusBadge'
 
 export type FeatherIconName = React.ComponentProps<typeof Feather>['name']
 
-interface Props {
+type Props = {
   title: string
   subtitles?: string[]
   status?: ExecutionStatus
