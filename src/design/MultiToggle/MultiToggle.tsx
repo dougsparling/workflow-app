@@ -11,12 +11,14 @@ type Props<T extends string> = {
   options: Option<T>[]
   value: T
   onChange: (value: T) => void
+  direction?: 'horizontal' | 'vertical'
 }
 
-export default function MultiToggle<T extends string>({ options, value, onChange }: Props<T>) {
+export default function MultiToggle<T extends string>({ options, value, onChange, direction = 'horizontal' }: Props<T>) {
   const styles = useThemedStyles(themedStyles)
+  const isVertical = direction === 'vertical'
   return (
-    <View style={styles.row}>
+    <View style={[styles.container, isVertical ? styles.containerVertical : styles.containerHorizontal]}>
       {options.map((opt) => (
         <Pressable
           key={opt.value}
@@ -33,12 +35,17 @@ export default function MultiToggle<T extends string>({ options, value, onChange
 }
 
 const themedStyles = createThemedStyles((tokens: ThemeTokens) => ({
-  row: {
-    flexDirection: 'row' as const,
+  container: {
     borderRadius: tokens.radiusSm,
     borderWidth: tokens.borderWidthDefault,
     borderColor: tokens.borderDefault,
     overflow: 'hidden' as const,
+  },
+  containerHorizontal: {
+    flexDirection: 'row' as const,
+  },
+  containerVertical: {
+    flexDirection: 'column' as const,
   },
   segment: {
     flex: 1,

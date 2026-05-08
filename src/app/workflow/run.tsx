@@ -98,6 +98,7 @@ export default function RunWorkflow() {
               setSelectedId(id)
               setFormValues({})
             }}
+            direction="vertical"
           />
 
           {properties && Object.keys(properties).length > 0 ? (
