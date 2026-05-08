@@ -1,3 +1,4 @@
+import { WikipediaQueryRun } from '@langchain/community/tools/wikipedia_query_run'
 import { tool, type StructuredToolInterface } from '@langchain/core/tools'
 import z from 'zod'
 
@@ -32,6 +33,11 @@ export const getExchangeRate = tool(
   },
 ) as Tool
 
-const tools: Tool[] = [getWeather, getExchangeRate]
+export const wikipedia = new WikipediaQueryRun({
+  topKResults: 3,
+  maxDocContentLength: 4000,
+}) as Tool
+
+const tools: Tool[] = [getWeather, getExchangeRate, wikipedia]
 
 export default tools

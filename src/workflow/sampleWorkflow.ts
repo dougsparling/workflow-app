@@ -3,6 +3,7 @@ import { enqueueAsync } from '@store/executionQueue'
 import { workflow } from './workflow'
 import { agentStep, type AgentExecutor, type AgentMeta } from './agentstep'
 import { deepseek, qwen } from './models'
+import { wikipedia } from './tools'
 
 const SummarySchema = Type.Object({
   topic: Type.String({ minLength: 10 }),
@@ -24,8 +25,8 @@ export const sampleWorkflow = workflow(Type.Object({ topic: Type.String() }))
     {
       name: 'Summarizer',
       model: deepseek,
-      tools: [],
-      systemPrompt: 'Write a 2-sentence factual summary of the given topic.',
+      tools: [wikipedia],
+      systemPrompt: 'Use Wikipedia to research the given topic, then write a 2-sentence factual summary grounded in the retrieved information.',
     },
     queueExecutor,
   ), { model: deepseek.label })

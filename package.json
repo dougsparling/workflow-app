@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
+    "@langchain/community": "^1.1.28",
     "@langchain/core": "^1.1.41",
     "@langchain/deepseek": "^1.0.25",
     "@langchain/openai": "^1.4.4",
